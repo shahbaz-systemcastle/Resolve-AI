@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Resolve-AI.API/Resolve-AI.API.csproj" />
+  <Project Path="resolve-AI.Application/resolve-AI.Application.csproj" />
+  <Project Path="resolve-AI.Domain/resolve-AI.Domain.csproj" />
+  <Project Path="resolve-AI.Infrastructure/resolve-AI.Infrastructure.csproj" />
+</Solution>
