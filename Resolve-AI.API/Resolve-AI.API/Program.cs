@@ -13,6 +13,12 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddScoped<ISupportRequestService, SupportRequestService>();
 
+builder.Services.AddScoped<IPhase7WorkflowService, Phase7WorkflowService>();
+
+builder.Services.AddScoped<
+    IMicrosoft365IntegrationService,
+    MockMicrosoft365IntegrationService>();
+
 builder.Services.AddScoped<PasswordExpiredWorkflow>();
 
 builder.Services.AddScoped<IPasswordService, MockPasswordService>();
