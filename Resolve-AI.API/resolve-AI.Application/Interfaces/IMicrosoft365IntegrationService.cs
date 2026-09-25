@@ -3,11 +3,13 @@
 namespace resolve_AI.Application.Interfaces;
 
 /// <summary>
-/// Defines the Phase 7 Microsoft 365 integration boundary.
+/// Defines the Microsoft 365 integration boundary
+/// for the License and Mailbox Management Module.
 ///
 /// MOCK/TBD:
 /// Final authentication, tenant configuration,
-/// Graph permissions and service contract are not yet confirmed.
+/// Microsoft Graph permissions and service contract
+/// are not yet confirmed.
 /// </summary>
 public interface IMicrosoft365IntegrationService
 {
@@ -15,6 +17,10 @@ public interface IMicrosoft365IntegrationService
         string? tenantIdentifier);
 
     Task<Microsoft365UserDto> GetUserAsync(
+        string userIdentifier,
+        string? tenantIdentifier);
+
+    Task<Microsoft365LicenseStatusDto> GetLicenseStatusAsync(
         string userIdentifier,
         string? tenantIdentifier);
 }
