@@ -25,6 +25,31 @@ public class MockMicrosoft365IntegrationService
         return Task.FromResult(true);
     }
 
+    public Task<List<Microsoft365UserDto>> GetUsersListAsync(
+        string? tenantIdentifier)
+    {
+        // MOCK/TBD:
+        // No real Microsoft Graph user list retrieval is performed.
+
+        var mockUsers = new List<Microsoft365UserDto>
+        {
+            new() {
+                UserIdentifier = "user1@example.com",
+                DisplayName = "Mock User One",
+                Found = true,
+                IsMock = true
+            },
+            new() {
+                UserIdentifier = "user2@example.com",
+                DisplayName = "Mock User Two",
+                Found = true,
+                IsMock = true
+            }
+        };
+
+        return Task.FromResult(mockUsers);
+    }
+
     public Task<Microsoft365UserDto> GetUserAsync(
         string userIdentifier,
         string? tenantIdentifier)
@@ -67,5 +92,28 @@ public class MockMicrosoft365IntegrationService
         };
 
         return Task.FromResult(licenseStatus);
+    }
+
+    public Task<Microsoft365LicenseAssignmentResultDto> AssignLicenseAsync(
+        string userIdentifier,
+        string? tenantIdentifier,
+        bool isApproved)
+    {
+        // MOCK/TBD:
+        // No real Microsoft Graph license assignment is performed.
+        // Exact Microsoft 365 SKU assignment and approval workflow
+        // are not confirmed yet.
+
+        var assignmentResult = new Microsoft365LicenseAssignmentResultDto
+        {
+            UserIdentifier = userIdentifier,
+            Success = true,
+            Message = "License assigned successfully (MOCK/TBD)",
+            AssignmentStatus = "SUCCESS",
+            AssignedSku = "ENTERPRISEPREMIUM",
+            IsMock = true
+        };
+
+        return Task.FromResult(assignmentResult);
     }
 }

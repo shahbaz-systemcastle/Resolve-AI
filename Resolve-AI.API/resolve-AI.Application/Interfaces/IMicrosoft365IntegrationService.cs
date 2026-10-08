@@ -16,6 +16,9 @@ public interface IMicrosoft365IntegrationService
     Task<bool> CheckAvailabilityAsync(
         string? tenantIdentifier);
 
+    Task<List<Microsoft365UserDto>> GetUsersListAsync(
+        string? tenantIdentifier);
+
     Task<Microsoft365UserDto> GetUserAsync(
         string userIdentifier,
         string? tenantIdentifier);
@@ -23,4 +26,9 @@ public interface IMicrosoft365IntegrationService
     Task<Microsoft365LicenseStatusDto> GetLicenseStatusAsync(
         string userIdentifier,
         string? tenantIdentifier);
+
+    Task<Microsoft365LicenseAssignmentResultDto> AssignLicenseAsync(
+        string userIdentifier,
+        string? tenantIdentifier,
+        bool isApproved);
 }

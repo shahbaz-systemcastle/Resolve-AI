@@ -12,4 +12,9 @@
     <ProjectReference Include="..\resolve-AI.Domain\resolve-AI.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Azure.Identity" Version="1.21.0" />
+    <PackageReference Include="Microsoft.Graph" Version="6.8.0" />
+  </ItemGroup>
+
 </Project>
