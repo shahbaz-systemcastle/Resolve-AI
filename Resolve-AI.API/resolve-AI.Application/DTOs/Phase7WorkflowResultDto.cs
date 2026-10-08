@@ -17,7 +17,7 @@ public class Phase7WorkflowResultDto
     public string Message { get; set; } = string.Empty;
 
     /// <summary>
-    /// Indicates that the current Phase 7 flow is using mock behavior.
+    /// True when any Microsoft 365 answer used in this result came from the mock.
     /// </summary>
-    public bool IsMock { get; set; } = true;
+    public bool IsMock { get; set; } = false;
 }

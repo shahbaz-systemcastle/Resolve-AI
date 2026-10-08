@@ -1,6 +1,7 @@
-﻿using Azure.Identity;
+using Azure.Identity;
 using Microsoft.Graph;
 using Microsoft.Graph.Models;
+using Microsoft.Kiota.Abstractions;
 using resolve_AI.Application.DTOs;
 using resolve_AI.Application.Interfaces;
 
@@ -9,6 +10,10 @@ namespace resolve_AI.Infrastructure.Services;
 /// <summary>
 /// Real Microsoft 365 integration service using Microsoft Graph API.
 /// Connects to actual Azure AD and retrieves real user and license data.
+///
+/// Errors from Graph are not hidden here. They propagate to the workflow,
+/// which reports them. The only exception is a 404 for a user lookup,
+/// which means the user does not exist in the tenant.
 /// </summary>
 public class Microsoft365IntegrationService : IMicrosoft365IntegrationService
 {
@@ -37,44 +42,29 @@ public class Microsoft365IntegrationService : IMicrosoft365IntegrationService
 
     public async Task<bool> CheckAvailabilityAsync(string? tenantIdentifier)
     {
-        try
-        {
-            // Simple connectivity check using organization endpoint
-            var org = await _graphClient.Organization.GetAsync();
-            return org != null;
-        }
-        catch
-        {
-            return false;
-        }
+        // Simple connectivity check using organization endpoint.
+        // Errors propagate so the workflow can report the real cause.
+        var org = await _graphClient.Organization.GetAsync();
+        return org != null;
     }
 
     public async Task<List<Microsoft365UserDto>> GetUsersListAsync(
         string? tenantIdentifier)
     {
-        try
-        {
-            var users = await _graphClient.Users
-                .GetAsync(requestConfiguration =>
-                {
-                    requestConfiguration.QueryParameters.Select = new[] { "id", "userPrincipalName", "displayName" };
-                    requestConfiguration.QueryParameters.Top = 999;
-                });
-
-            var userList = users?.Value?.Select(u => new Microsoft365UserDto
+        var users = await _graphClient.Users
+            .GetAsync(requestConfiguration =>
             {
-                UserIdentifier = u.UserPrincipalName ?? u.Id ?? "Unknown",
-                DisplayName = u.DisplayName ?? "Unknown User",
-                Found = true,
-                IsMock = false
-            }).ToList() ?? new List<Microsoft365UserDto>();
+                requestConfiguration.QueryParameters.Select = new[] { "id", "userPrincipalName", "displayName" };
+                requestConfiguration.QueryParameters.Top = 999;
+            });
 
-            return userList;
-        }
-        catch
+        return users?.Value?.Select(u => new Microsoft365UserDto
         {
-            return new List<Microsoft365UserDto>();
-        }
+            UserIdentifier = u.UserPrincipalName ?? u.Id ?? "Unknown",
+            DisplayName = u.DisplayName ?? "Unknown User",
+            Found = true,
+            IsMock = false
+        }).ToList() ?? new List<Microsoft365UserDto>();
     }
 
     public async Task<Microsoft365UserDto> GetUserAsync(
@@ -94,8 +84,9 @@ public class Microsoft365IntegrationService : IMicrosoft365IntegrationService
                 IsMock = false
             };
         }
-        catch
+        catch (ApiException ex) when (ex.ResponseStatusCode == 404)
         {
+            // Graph returns 404 when the user does not exist in the tenant.
             return new Microsoft365UserDto
             {
                 UserIdentifier = userIdentifier,
@@ -110,34 +101,23 @@ public class Microsoft365IntegrationService : IMicrosoft365IntegrationService
         string userIdentifier,
         string? tenantIdentifier)
     {
-        try
-        {
-            var licenseDetails = await _graphClient.Users[userIdentifier]
-                .LicenseDetails
-                .GetAsync();
+        // Errors propagate. A failed lookup must never look like "no license",
+        // because that would lead to an assignment.
+        var licenseDetails = await _graphClient.Users[userIdentifier]
+            .LicenseDetails
+            .GetAsync();
 
-            var hasLicense = licenseDetails?.Value?.Count > 0;
+        var hasLicense = licenseDetails?.Value?.Count > 0;
 
-            return new Microsoft365LicenseStatusDto
-            {
-                UserIdentifier = userIdentifier,
-                HasAssignedLicense = hasLicense,
-                LicenseStatus = hasLicense
-                    ? $"{licenseDetails?.Value?.Count ?? 0} license(s) assigned"
-                    : "No licenses assigned",
-                IsMock = false
-            };
-        }
-        catch
+        return new Microsoft365LicenseStatusDto
         {
-            return new Microsoft365LicenseStatusDto
-            {
-                UserIdentifier = userIdentifier,
-                HasAssignedLicense = false,
-                LicenseStatus = "Unable to retrieve license status",
-                IsMock = false
-            };
-        }
+            UserIdentifier = userIdentifier,
+            HasAssignedLicense = hasLicense,
+            LicenseStatus = hasLicense
+                ? $"{licenseDetails?.Value?.Count ?? 0} license(s) assigned"
+                : "No licenses assigned",
+            IsMock = false
+        };
     }
 
     public async Task<Microsoft365LicenseAssignmentResultDto> AssignLicenseAsync(
@@ -159,7 +139,16 @@ public class Microsoft365IntegrationService : IMicrosoft365IntegrationService
                 };
             }
 
-            // Get available SKUs from tenant
+            // SKUs the user already holds must not be assigned again
+            var currentLicenses = await _graphClient.Users[userIdentifier]
+                .LicenseDetails
+                .GetAsync();
+
+            var currentSkuIds = currentLicenses?.Value?
+                .Select(l => l.SkuId)
+                .ToHashSet() ?? new HashSet<Guid?>();
+
+            // Get SKUs from tenant
             var skus = await _graphClient.SubscribedSkus.GetAsync();
             if (skus?.Value == null || skus.Value.Count == 0)
             {
@@ -173,8 +162,13 @@ public class Microsoft365IntegrationService : IMicrosoft365IntegrationService
                 };
             }
 
-            // Get first available SKU
-            var availableSku = skus.Value.FirstOrDefault();
+            // Choose a SKU that is enabled, has free seats, and is not
+            // already held by the user. Which SKU is the right one for a
+            // given user is still an open business rule.
+            var availableSku = skus.Value.FirstOrDefault(s =>
+                s.CapabilityStatus == "Enabled" &&
+                (s.PrepaidUnits?.Enabled ?? 0) - (s.ConsumedUnits ?? 0) > 0 &&
+                !currentSkuIds.Contains(s.SkuId));
 
             if (availableSku == null)
             {
@@ -182,7 +176,7 @@ public class Microsoft365IntegrationService : IMicrosoft365IntegrationService
                 {
                     UserIdentifier = userIdentifier,
                     Success = false,
-                    Message = "No available licenses to assign",
+                    Message = "No SKU with free seats is available for this user",
                     AssignmentStatus = "FAILED",
                     IsMock = false
                 };
