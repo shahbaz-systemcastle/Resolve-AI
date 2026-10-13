@@ -31,4 +31,9 @@ public interface IMicrosoft365IntegrationService
         string userIdentifier,
         string? tenantIdentifier,
         bool isApproved);
+
+    // WBS 7.9 - Mailbox usage (Graph usage report).
+    Task<MailboxUsageDto> GetMailboxUsageAsync(
+        string userIdentifier,
+        string? tenantIdentifier);
 }

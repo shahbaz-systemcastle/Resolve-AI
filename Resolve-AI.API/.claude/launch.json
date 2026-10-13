@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Resolve-AI API",
+      "runtimeExecutable": "dotnet",
+      "runtimeArgs": ["run", "--project", "Resolve-AI.API/Resolve-AI.API.csproj"],
+      "port": 5000
+    }
+  ]
+}

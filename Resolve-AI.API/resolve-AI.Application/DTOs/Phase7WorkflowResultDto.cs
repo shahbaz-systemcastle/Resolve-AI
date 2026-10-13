@@ -14,6 +14,11 @@ public class Phase7WorkflowResultDto
 
     public bool Success { get; set; }
 
+    /// <summary>
+    /// Outcome code, see <see cref="Phase7Status"/>.
+    /// </summary>
+    public string Status { get; set; } = Phase7Status.WorkflowError;
+
     public string Message { get; set; } = string.Empty;
 
     /// <summary>

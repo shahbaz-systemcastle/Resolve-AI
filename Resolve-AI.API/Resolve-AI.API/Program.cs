@@ -1,4 +1,4 @@
-using resolve_AI.Application.Interfaces;
+﻿using resolve_AI.Application.Interfaces;
 using resolve_AI.Application.Services;
 using resolve_AI.Application.UseCases.PasswordExpired;
 using resolve_AI.Infrastructure.Services;
@@ -35,6 +35,8 @@ builder.Services.AddScoped<PasswordExpiredWorkflow>();
 
 builder.Services.AddScoped<IPasswordService, MockPasswordService>();
 
+builder.Services.AddScoped<IExchangeIntegrationService, ExchangeIntegrationService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -50,3 +52,4 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+

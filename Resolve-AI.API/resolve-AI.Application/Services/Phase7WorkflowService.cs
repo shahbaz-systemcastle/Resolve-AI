@@ -8,26 +8,34 @@ namespace resolve_AI.Application.Services;
 /// <summary>
 /// Workflow entry point for the License and Mailbox Management Module.
 ///
-/// This service orchestrates the Phase 7 steps in order:
-///   7.2 Request Information Validation
-///   7.3 Microsoft 365 Integration
-///   7.4 User Information Retrieval
-///   7.5 License Status Retrieval
-///   7.6 License Status Validation
-///   7.7 Approved License Action Execution
+/// UC-07 (license not assigned):
+///   7.03 Request validation
+///   7.04 Microsoft 365 availability
+///   7.05 User lookup (user must exist and be enabled)
+///   7.06 License status retrieval
+///   7.07 License validation and approved assignment
+///   7.08 Assignment verification (license is read back until visible)
 ///
-/// Not implemented yet:
-///   7.8  License Action Result Reception
-///   7.9  - 7.14 Exchange / Mailbox steps
-///   7.15 - 7.16 Technical result and orchestration handoff
+/// UC-08 (mailbox capacity threshold alert):
+///   7.03 Request validation
+///   7.04 Microsoft 365 availability
+///   7.05 User lookup
+///   7.09 Mailbox usage retrieval (Graph usage report)
+///   7.10 Mailbox capacity analysis
+///
+/// Not implemented yet: 7.11 - 7.14 (quota evaluation, alert setup,
+/// notification, monitoring) and 7.15 - 7.16 (orchestration handoff).
 ///
 /// Microsoft 365 calls go through IMicrosoft365IntegrationService.
-/// The implementation is real (Microsoft Graph) when AZURE_CLIENT_SECRET
-/// is set, otherwise it is the mock. The IsMock flag in the result
-/// reports which implementation answered.
+/// IsMock in the result reports whether the mock answered.
 /// </summary>
 public class Phase7WorkflowService : IPhase7WorkflowService
 {
+    // MOCK/TBD: Graph can take a while to show a new license.
+    private const int VerificationAttempts = 5;
+
+    private static readonly TimeSpan VerificationDelay = TimeSpan.FromSeconds(5);
+
     private readonly IMicrosoft365IntegrationService
         _microsoft365IntegrationService;
 
@@ -40,13 +48,14 @@ public class Phase7WorkflowService : IPhase7WorkflowService
     public async Task<Phase7WorkflowResultDto> ProcessAsync(
         Phase7WorkflowRequestDto request)
     {
-        // 7.2 - Request Information Validation
+        // 7.03 - Request Information Validation
 
         if (request is null)
         {
             return new Phase7WorkflowResultDto
             {
                 Success = false,
+                Status = Phase7Status.ValidationFailed,
                 Message = "Phase 7 workflow request cannot be null.",
                 IsMock = false
             };
@@ -54,39 +63,50 @@ public class Phase7WorkflowService : IPhase7WorkflowService
 
         if (string.IsNullOrWhiteSpace(request.RequestId))
         {
-            return Failure(request, "RequestId is required.");
+            return Failure(request, Phase7Status.ValidationFailed,
+                "RequestId is required.");
         }
 
         if (string.IsNullOrWhiteSpace(request.UserIdentifier))
         {
-            return Failure(request, "UserIdentifier is required.");
+            return Failure(request, Phase7Status.ValidationFailed,
+                "UserIdentifier is required.");
         }
 
         if (request.UseCase != UseCaseType.Microsoft365LicenseNotAssigned &&
             request.UseCase != UseCaseType.MailboxCapacityThresholdAlert)
         {
-            return Failure(request, "UseCase is not supported by Phase 7.");
+            return Failure(request, Phase7Status.ValidationFailed,
+                "UseCase is not supported by Phase 7.");
         }
 
         // Tracks whether any Microsoft 365 answer came from the mock.
         var usesMock = false;
 
+        // 7.04 - Microsoft 365 availability.
+        // A Graph error gets its own status instead of a generic failure.
+
         try
         {
-            // 7.3 - Microsoft 365 Integration
-
             var isIntegrationAvailable =
                 await _microsoft365IntegrationService.CheckAvailabilityAsync(
                     request.TenantIdentifier);
 
             if (!isIntegrationAvailable)
             {
-                return Failure(
-                    request,
+                return Failure(request, Phase7Status.Microsoft365Unavailable,
                     "Microsoft 365 integration is not available.");
             }
+        }
+        catch (Exception ex)
+        {
+            return Failure(request, Phase7Status.Microsoft365Unavailable,
+                $"Microsoft 365 is not reachable: {ex.Message}");
+        }
 
-            // 7.4 - User Information Retrieval
+        try
+        {
+            // 7.05 - User Information Retrieval
 
             var user =
                 await _microsoft365IntegrationService.GetUserAsync(
@@ -97,25 +117,29 @@ public class Phase7WorkflowService : IPhase7WorkflowService
 
             if (!user.Found)
             {
-                return Failure(
-                    request,
+                return Failure(request, Phase7Status.UserNotFound,
                     "Microsoft 365 user was not found for the supplied "
-                    + "UserIdentifier.",
+                    + "UserIdentifier.", usesMock);
+            }
+
+            // 7.05 - A disabled account must not receive or keep licenses.
+            if (!user.AccountEnabled)
+            {
+                return Failure(request, Phase7Status.UserDisabled,
+                    $"User '{user.DisplayName}' is disabled in Microsoft 365.",
                     usesMock);
             }
 
-            // Mailbox handling (WBS 7.9 - 7.14) is not implemented yet,
-            // so UC-08 stops here instead of returning a misleading success.
             if (request.UseCase == UseCaseType.MailboxCapacityThresholdAlert)
             {
-                return Failure(
+                return await ProcessMailboxCapacityAsync(
                     request,
-                    "Mailbox capacity handling is not implemented yet "
-                    + "(WBS 7.9 - 7.14).",
+                    user.UserIdentifier,
+                    request.TenantIdentifier,
                     usesMock);
             }
 
-            // 7.5 - License Status Retrieval
+            // 7.06 - License Status Retrieval
 
             var licenseStatus =
                 await _microsoft365IntegrationService.GetLicenseStatusAsync(
@@ -124,14 +148,15 @@ public class Phase7WorkflowService : IPhase7WorkflowService
 
             usesMock = usesMock || licenseStatus.IsMock;
 
-            // 7.6 - License Status Validation
+            // 7.07 - License Status Validation
 
             var licenseValidation =
                 Microsoft365LicenseStatusValidator.Validate(licenseStatus);
 
             if (!licenseValidation.IsValid)
             {
-                return Failure(request, licenseValidation.Message, usesMock);
+                return Failure(request, Phase7Status.LicenseReviewRequired,
+                    licenseValidation.Message, usesMock);
             }
 
             // The user already has a license, so no action is taken.
@@ -142,54 +167,164 @@ public class Phase7WorkflowService : IPhase7WorkflowService
                     RequestId = request.RequestId,
                     UseCase = request.UseCase,
                     Success = true,
-                    Message = $"User '{user.DisplayName}' already has a "
-                              + "Microsoft 365 license. No license action "
-                              + "required.",
+                    Status = Phase7Status.NoActionRequired,
+                    Message = licenseValidation.Message,
                     IsMock = usesMock
                 };
             }
 
-            // 7.7 - Approved License Action Execution
+            // 7.07 - Approved License Action Execution
+
+            var isApproved = request.IsApproved ?? false;
+
+            if (!isApproved)
+            {
+                return Failure(request, Phase7Status.NotApproved,
+                    "Business Premium assignment is not approved.", usesMock);
+            }
+
+            // A license cannot be assigned until the user has a usage location.
+            if (string.IsNullOrWhiteSpace(user.UsageLocation))
+            {
+                return Failure(request, Phase7Status.UsageLocationMissing,
+                    "User has no usage location set in Microsoft 365, "
+                    + "which is required before a license can be assigned.",
+                    usesMock);
+            }
 
             var assignmentResult =
                 await _microsoft365IntegrationService.AssignLicenseAsync(
                     request.UserIdentifier,
                     request.TenantIdentifier,
-                    request.IsApproved ?? false);
+                    isApproved);
 
             usesMock = usesMock || assignmentResult.IsMock;
 
             if (!assignmentResult.Success)
             {
-                return Failure(request, assignmentResult.Message, usesMock);
+                // The assignment status is a specific code such as
+                // NO_FREE_SEATS or SKU_NOT_ENABLED; pass it through.
+                return Failure(request, assignmentResult.AssignmentStatus,
+                    assignmentResult.Message, usesMock);
             }
 
-            // WBS 7.8 (License Action Result Reception) is not implemented
-            // yet. The assignment result is received but not processed further.
+            // 7.08 - Assignment Result Reception: Graph accepting the request
+            // is not enough, so the license is read back until it is visible.
+
+            var verifiedStatus = await WaitForLicenseAsync(
+                request.UserIdentifier,
+                request.TenantIdentifier);
+
+            if (verifiedStatus == null)
+            {
+                // Microsoft 365 accepted the assignment, so the license may
+                // exist. This is reported as UNVERIFIED, not as a plain failure.
+                return new Phase7WorkflowResultDto
+                {
+                    RequestId = request.RequestId,
+                    UseCase = request.UseCase,
+                    Success = false,
+                    Status = Phase7Status.AssignedUnverified,
+                    Message = "Assignment was accepted by Microsoft 365, but the "
+                              + $"license was not visible after {VerificationAttempts} "
+                              + "checks. Check the license state before any retry.",
+                    IsMock = usesMock
+                };
+            }
+
             return new Phase7WorkflowResultDto
             {
                 RequestId = request.RequestId,
                 UseCase = request.UseCase,
                 Success = true,
+                Status = Phase7Status.Completed,
                 Message = $"User '{user.DisplayName}' resolved. "
                           + assignmentResult.Message
-                          + " (WBS 7.8-7.16 pending).",
+                          + " License verified: Business Premium with active Teams. "
+                          + "(WBS 7.11-7.16 pending.)",
                 IsMock = usesMock
             };
         }
         catch (Exception ex)
         {
             // A Microsoft 365 call failed. Report the real error instead
-            // of treating it as "not found" or as a successful assignment.
-            return Failure(
-                request,
-                $"Microsoft 365 call failed: {ex.Message}",
-                usesMock);
+            // of treating it as "not found" or as a success.
+            return Failure(request, Phase7Status.WorkflowError,
+                $"Phase 7 workflow failed: {ex.Message}", usesMock);
         }
+    }
+
+    // UC-08: 7.09 mailbox usage, 7.10 capacity analysis.
+    // The data comes from the Graph usage report, so no Exchange
+    // connection is needed for this path.
+    private async Task<Phase7WorkflowResultDto> ProcessMailboxCapacityAsync(
+        Phase7WorkflowRequestDto request,
+        string userPrincipalName,
+        string? tenantIdentifier,
+        bool usesMock)
+    {
+        // 7.09 - Mailbox Usage Retrieval
+
+        var usage = await _microsoft365IntegrationService.GetMailboxUsageAsync(
+            userPrincipalName,
+            tenantIdentifier);
+
+        usesMock = usesMock || usage.IsMock;
+
+        if (!usage.Found)
+        {
+            return Failure(request, Phase7Status.MailboxDataNotFound,
+                "No mailbox usage data was found for the user.", usesMock);
+        }
+
+        // 7.10 - Mailbox Capacity Analysis
+
+        var capacity = MailboxCapacityAnalyzer.Analyze(usage);
+
+        var analysed = capacity.State != "UNKNOWN";
+
+        return new Phase7WorkflowResultDto
+        {
+            RequestId = request.RequestId,
+            UseCase = request.UseCase,
+            Success = analysed,
+            Status = analysed
+                ? Phase7Status.CapacityAnalysed
+                : Phase7Status.CapacityUnknown,
+            Message = capacity.Message + " (WBS 7.11-7.16 pending.)",
+            IsMock = usesMock
+        };
+    }
+
+    // 7.08 - Re-reads the license until Business Premium with Teams is visible.
+    private async Task<Microsoft365LicenseStatusDto?> WaitForLicenseAsync(
+        string userIdentifier,
+        string? tenantIdentifier)
+    {
+        for (var attempt = 1; attempt <= VerificationAttempts; attempt++)
+        {
+            var status =
+                await _microsoft365IntegrationService.GetLicenseStatusAsync(
+                    userIdentifier,
+                    tenantIdentifier);
+
+            if (status.HasRequiredLicense && status.IsTeamsEnabled == true)
+            {
+                return status;
+            }
+
+            if (attempt < VerificationAttempts)
+            {
+                await Task.Delay(VerificationDelay);
+            }
+        }
+
+        return null;
     }
 
     private static Phase7WorkflowResultDto Failure(
         Phase7WorkflowRequestDto request,
+        string status,
         string message,
         bool isMock = false)
     {
@@ -198,6 +333,7 @@ public class Phase7WorkflowService : IPhase7WorkflowService
             RequestId = request.RequestId,
             UseCase = request.UseCase,
             Success = false,
+            Status = status,
             Message = message,
             IsMock = isMock
         };

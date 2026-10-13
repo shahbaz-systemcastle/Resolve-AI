@@ -15,5 +15,10 @@ public class Microsoft365UserDto
 
     public bool Found { get; set; }
 
+    public bool AccountEnabled { get; set; } = true;
+
+    /// <summary>Two-letter country code. Required before a license can be assigned.</summary>
+    public string? UsageLocation { get; set; }
+
     public bool IsMock { get; set; } = true;
 }

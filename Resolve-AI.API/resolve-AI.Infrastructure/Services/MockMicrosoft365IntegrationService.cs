@@ -62,6 +62,8 @@ public class MockMicrosoft365IntegrationService
             UserIdentifier = userIdentifier,
             DisplayName = "Mock License and Mailbox User",
             Found = true,
+            AccountEnabled = true,
+            UsageLocation = "US",
             IsMock = true
         };
 
@@ -115,5 +117,25 @@ public class MockMicrosoft365IntegrationService
         };
 
         return Task.FromResult(assignmentResult);
+    }
+
+    public Task<MailboxUsageDto> GetMailboxUsageAsync(
+        string userIdentifier,
+        string? tenantIdentifier)
+    {
+        // MOCK/TBD:
+        // No real mailbox usage report is read.
+        // Values are chosen to fall in the WARNING range (84%).
+
+        var usage = new MailboxUsageDto
+        {
+            UserIdentifier = userIdentifier,
+            Found = true,
+            UsedBytes = 42L * 1024 * 1024 * 1024,
+            QuotaBytes = 50L * 1024 * 1024 * 1024,
+            IsMock = true
+        };
+
+        return Task.FromResult(usage);
     }
 }

@@ -20,7 +20,7 @@ public class Phase7TestController : ControllerBase
         _microsoft365IntegrationService = microsoft365IntegrationService;
     }
 
-    // 7.2-7.7 Workflow Tests
+    // Workflow tests with built-in requests (UC-07 and UC-08)
 
     [HttpPost("uc07")]
     public async Task<IActionResult> TestUc07()
@@ -65,7 +65,7 @@ public class Phase7TestController : ControllerBase
         return Ok(result);
     }
 
-    // 7.2-7.7 Complete Workflow (Generic)
+    // Complete workflow with a caller-supplied request
 
     [HttpPost("process")]
     public async Task<IActionResult> ProcessWorkflow(
@@ -75,7 +75,7 @@ public class Phase7TestController : ControllerBase
         return Ok(result);
     }
 
-    // 7.2 - M365 Integration Check
+    // 7.3 - Microsoft 365 availability check
 
     [HttpGet("microsoft365")]
     public async Task<IActionResult> TestMicrosoft365Integration()
