@@ -22,6 +22,11 @@ public class Phase7WorkflowResultDto
     public string Message { get; set; } = string.Empty;
 
     /// <summary>
+    /// Set only for UC-08 after quota evaluation (WBS 7.11).
+    /// </summary>
+    public QuotaEvaluationResultDto? QuotaEvaluation { get; set; }
+
+    /// <summary>
     /// True when any Microsoft 365 answer used in this result came from the mock.
     /// </summary>
     public bool IsMock { get; set; } = false;

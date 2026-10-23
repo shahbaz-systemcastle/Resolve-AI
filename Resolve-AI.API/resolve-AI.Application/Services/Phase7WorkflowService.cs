@@ -22,9 +22,10 @@ namespace resolve_AI.Application.Services;
 ///   7.05 User lookup
 ///   7.09 Mailbox usage retrieval (Graph usage report)
 ///   7.10 Mailbox capacity analysis
+///   7.11 Quota evaluation (decides whether an alert is required)
 ///
-/// Not implemented yet: 7.11 - 7.14 (quota evaluation, alert setup,
-/// notification, monitoring) and 7.15 - 7.16 (orchestration handoff).
+/// Not implemented yet: 7.12 - 7.14 (alert setup, notification,
+/// monitoring) and 7.15 - 7.16 (orchestration handoff).
 ///
 /// Microsoft 365 calls go through IMicrosoft365IntegrationService.
 /// IsMock in the result reports whether the mock answered.
@@ -241,7 +242,7 @@ public class Phase7WorkflowService : IPhase7WorkflowService
                 Message = $"User '{user.DisplayName}' resolved. "
                           + assignmentResult.Message
                           + " License verified: Business Premium with active Teams. "
-                          + "(WBS 7.11-7.16 pending.)",
+                          + "(WBS 7.12-7.16 pending.)",
                 IsMock = usesMock
             };
         }
@@ -283,6 +284,10 @@ public class Phase7WorkflowService : IPhase7WorkflowService
 
         var analysed = capacity.State != "UNKNOWN";
 
+        // 7.11 - Quota Evaluation (decision only; no alert is set up here)
+
+        var quotaEvaluation = QuotaEvaluator.Evaluate(capacity);
+
         return new Phase7WorkflowResultDto
         {
             RequestId = request.RequestId,
@@ -291,7 +296,9 @@ public class Phase7WorkflowService : IPhase7WorkflowService
             Status = analysed
                 ? Phase7Status.CapacityAnalysed
                 : Phase7Status.CapacityUnknown,
-            Message = capacity.Message + " (WBS 7.11-7.16 pending.)",
+            Message = capacity.Message + " " + quotaEvaluation.Message
+                      + " (WBS 7.12-7.16 pending.)",
+            QuotaEvaluation = quotaEvaluation,
             IsMock = usesMock
         };
     }
