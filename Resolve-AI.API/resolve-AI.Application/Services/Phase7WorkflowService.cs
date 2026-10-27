@@ -8,24 +8,33 @@ namespace resolve_AI.Application.Services;
 /// <summary>
 /// Workflow entry point for the License and Mailbox Management Module.
 ///
+/// Step numbers follow the WBS list. 7.13a and 7.13b are extra steps that are
+/// not in the WBS: alert setup and notification, both part of 7.13 validation.
+///
 /// UC-07 (license not assigned):
 ///   7.03 Request validation
 ///   7.04 Microsoft 365 availability
 ///   7.05 User lookup (user must exist and be enabled)
 ///   7.06 License status retrieval
-///   7.07 License validation and approved assignment
-///   7.08 Assignment verification (license is read back until visible)
+///   7.07 License validation
+///   7.08 Approved license assignment
+///   7.09 Assignment verification (license is read back until visible)
 ///
 /// UC-08 (mailbox capacity threshold alert):
 ///   7.03 Request validation
 ///   7.04 Microsoft 365 availability
 ///   7.05 User lookup
-///   7.09 Mailbox usage retrieval (Graph usage report)
-///   7.10 Mailbox capacity analysis
-///   7.11 Quota evaluation (decides whether an alert is required)
+///   7.11 Mailbox usage retrieval (Graph usage report)
+///   7.12 Mailbox capacity analysis
+///   7.13 Quota evaluation (decides whether an alert is required)
+///   7.13a Alert setup (creates an OPEN alert record; extra step)
+///   7.13b Notification (through IMailboxAlertNotifier; default only logs; extra step)
+///   7.14 Approved mailbox action (through IMailboxActionExecutor; default only logs,
+///        provisional until Phase 3 and 4 define the action)
+///   7.15 Mailbox action result reception (MailboxActionResultValidator; provisional)
+///   7.16 Technical result preparation (the Phase7WorkflowResultDto returned here)
 ///
-/// Not implemented yet: 7.12 - 7.14 (alert setup, notification,
-/// monitoring) and 7.15 - 7.16 (orchestration handoff).
+/// Not implemented yet: 7.17 (orchestration result handoff).
 ///
 /// Microsoft 365 calls go through IMicrosoft365IntegrationService.
 /// IsMock in the result reports whether the mock answered.
@@ -40,10 +49,18 @@ public class Phase7WorkflowService : IPhase7WorkflowService
     private readonly IMicrosoft365IntegrationService
         _microsoft365IntegrationService;
 
+    private readonly IMailboxAlertNotifier _mailboxAlertNotifier;
+
+    private readonly IMailboxActionExecutor _mailboxActionExecutor;
+
     public Phase7WorkflowService(
-        IMicrosoft365IntegrationService microsoft365IntegrationService)
+        IMicrosoft365IntegrationService microsoft365IntegrationService,
+        IMailboxAlertNotifier mailboxAlertNotifier,
+        IMailboxActionExecutor mailboxActionExecutor)
     {
         _microsoft365IntegrationService = microsoft365IntegrationService;
+        _mailboxAlertNotifier = mailboxAlertNotifier;
+        _mailboxActionExecutor = mailboxActionExecutor;
     }
 
     public async Task<Phase7WorkflowResultDto> ProcessAsync(
@@ -174,7 +191,7 @@ public class Phase7WorkflowService : IPhase7WorkflowService
                 };
             }
 
-            // 7.07 - Approved License Action Execution
+            // 7.08 - Approved License Action Execution
 
             var isApproved = request.IsApproved ?? false;
 
@@ -209,7 +226,7 @@ public class Phase7WorkflowService : IPhase7WorkflowService
                     assignmentResult.Message, usesMock);
             }
 
-            // 7.08 - Assignment Result Reception: Graph accepting the request
+            // 7.09 - Assignment Result Reception: Graph accepting the request
             // is not enough, so the license is read back until it is visible.
 
             var verifiedStatus = await WaitForLicenseAsync(
@@ -242,7 +259,7 @@ public class Phase7WorkflowService : IPhase7WorkflowService
                 Message = $"User '{user.DisplayName}' resolved. "
                           + assignmentResult.Message
                           + " License verified: Business Premium with active Teams. "
-                          + "(WBS 7.12-7.16 pending.)",
+                          + "(WBS 7.17 pending.)",
                 IsMock = usesMock
             };
         }
@@ -255,7 +272,7 @@ public class Phase7WorkflowService : IPhase7WorkflowService
         }
     }
 
-    // UC-08: 7.09 mailbox usage, 7.10 capacity analysis.
+    // UC-08: 7.11 mailbox usage, 7.12 capacity analysis.
     // The data comes from the Graph usage report, so no Exchange
     // connection is needed for this path.
     private async Task<Phase7WorkflowResultDto> ProcessMailboxCapacityAsync(
@@ -264,7 +281,7 @@ public class Phase7WorkflowService : IPhase7WorkflowService
         string? tenantIdentifier,
         bool usesMock)
     {
-        // 7.09 - Mailbox Usage Retrieval
+        // 7.11 - Mailbox Usage Retrieval
 
         var usage = await _microsoft365IntegrationService.GetMailboxUsageAsync(
             userPrincipalName,
@@ -278,15 +295,47 @@ public class Phase7WorkflowService : IPhase7WorkflowService
                 "No mailbox usage data was found for the user.", usesMock);
         }
 
-        // 7.10 - Mailbox Capacity Analysis
+        // 7.12 - Mailbox Capacity Analysis
 
         var capacity = MailboxCapacityAnalyzer.Analyze(usage);
 
         var analysed = capacity.State != "UNKNOWN";
 
-        // 7.11 - Quota Evaluation (decision only; no alert is set up here)
+        // 7.13 - Quota Evaluation (decision only; no alert is set up here)
 
         var quotaEvaluation = QuotaEvaluator.Evaluate(capacity);
+
+        // 7.13a - Alert Setup (extra step; creates an OPEN record, nothing is sent)
+
+        var alert = MailboxAlertSetup.Create(quotaEvaluation, DateTime.UtcNow);
+
+        // 7.13b - Notification (extra step). Only runs when an alert exists.
+        // The default notifier logs the alert and sends nothing.
+
+        var notification = alert == null
+            ? null
+            : await _mailboxAlertNotifier.NotifyAsync(alert);
+
+        // 7.14 - Approved Mailbox Action (provisional). Runs only when an alert
+        // exists and the request is approved. Default executor only logs.
+
+        MailboxActionResultDto? action = null;
+
+        if (alert != null)
+        {
+            action = request.IsApproved == true
+                ? await _mailboxActionExecutor.ExecuteAsync(alert)
+                : new MailboxActionResultDto
+                {
+                    AlertId = alert.AlertId,
+                    Status = Phase7Status.NotApproved,
+                    Message = "Mailbox action is not approved; nothing was run."
+                };
+
+            // 7.15 - Mailbox Action Result Reception (checks the executor's answer)
+
+            action = MailboxActionResultValidator.Receive(alert, action);
+        }
 
         return new Phase7WorkflowResultDto
         {
@@ -297,13 +346,19 @@ public class Phase7WorkflowService : IPhase7WorkflowService
                 ? Phase7Status.CapacityAnalysed
                 : Phase7Status.CapacityUnknown,
             Message = capacity.Message + " " + quotaEvaluation.Message
-                      + " (WBS 7.12-7.16 pending.)",
+                      + (alert == null ? "" : $" Alert {alert.AlertId} is {alert.Status}; "
+                          + $"notification {notification!.Status}; "
+                          + $"mailbox action {action!.Status}.")
+                      + " (WBS 7.17 pending.)",
             QuotaEvaluation = quotaEvaluation,
+            Alert = alert,
+            AlertNotification = notification,
+            MailboxAction = action,
             IsMock = usesMock
         };
     }
 
-    // 7.08 - Re-reads the license until Business Premium with Teams is visible.
+    // 7.09 - Re-reads the license until Business Premium with Teams is visible.
     private async Task<Microsoft365LicenseStatusDto?> WaitForLicenseAsync(
         string userIdentifier,
         string? tenantIdentifier)

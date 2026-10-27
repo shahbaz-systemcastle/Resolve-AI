@@ -22,9 +22,24 @@ public class Phase7WorkflowResultDto
     public string Message { get; set; } = string.Empty;
 
     /// <summary>
-    /// Set only for UC-08 after quota evaluation (WBS 7.11).
+    /// Set only for UC-08 after quota evaluation (WBS 7.13).
     /// </summary>
     public QuotaEvaluationResultDto? QuotaEvaluation { get; set; }
+
+    /// <summary>
+    /// Set only when quota evaluation requires an alert (WBS 7.13a).
+    /// </summary>
+    public MailboxCapacityAlertDto? Alert { get; set; }
+
+    /// <summary>
+    /// Set only when an alert was created (WBS 7.13b).
+    /// </summary>
+    public MailboxAlertNotificationResultDto? AlertNotification { get; set; }
+
+    /// <summary>
+    /// Set only when an alert exists (WBS 7.14, provisional).
+    /// </summary>
+    public MailboxActionResultDto? MailboxAction { get; set; }
 
     /// <summary>
     /// True when any Microsoft 365 answer used in this result came from the mock.

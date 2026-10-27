@@ -21,4 +21,8 @@ public static class Phase7Status
     public const string CapacityAnalysed = "CAPACITY_ANALYSED";
     public const string CapacityUnknown = "CAPACITY_UNKNOWN";
     public const string WorkflowError = "WORKFLOW_ERROR";
+
+    // Mailbox action result codes (WBS 7.14 and 7.15), in MailboxActionResultDto.Status.
+    public const string MailboxActionLoggedOnly = "LOGGED_ONLY";
+    public const string MailboxActionFailed = "FAILED";
 }

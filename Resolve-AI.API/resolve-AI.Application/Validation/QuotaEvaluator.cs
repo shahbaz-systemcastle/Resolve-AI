@@ -3,9 +3,9 @@ using resolve_AI.Application.DTOs;
 namespace resolve_AI.Application.Validation;
 
 /// <summary>
-/// WBS 7.11 - Quota Evaluation.
+/// WBS 7.13 - Quota Evaluation.
 ///
-/// Pure logic: decides whether the capacity state from 7.10 requires
+/// Pure logic: decides whether the capacity state from 7.12 requires
 /// an alert. WARNING and CRITICAL require one; NORMAL does not.
 /// If the capacity could not be analysed, nothing is decided.
 ///

@@ -1,7 +1,7 @@
 namespace resolve_AI.Application.DTOs;
 
 /// <summary>
-/// Result of mailbox capacity analysis (WBS 7.10).
+/// Result of mailbox capacity analysis (WBS 7.12).
 /// State is one of: UNKNOWN, NORMAL, WARNING, CRITICAL.
 /// </summary>
 public class MailboxCapacityResultDto

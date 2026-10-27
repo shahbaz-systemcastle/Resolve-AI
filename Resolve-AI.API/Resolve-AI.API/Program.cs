@@ -19,23 +19,21 @@ builder.Services.AddScoped<ISupportRequestService, SupportRequestService>();
 
 builder.Services.AddScoped<IPhase7WorkflowService, Phase7WorkflowService>();
 
-// Use real service if credentials are configured, otherwise mock
-if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("AZURE_CLIENT_SECRET")))
-{
-    builder.Services.AddScoped<IMicrosoft365IntegrationService,
-        Microsoft365IntegrationService>();
-}
-else
-{
-    builder.Services.AddScoped<IMicrosoft365IntegrationService,
-        MockMicrosoft365IntegrationService>();
-}
+// Real Microsoft Graph service only. Without AZURE_* settings it fails with a
+// clear error on first use, instead of silently answering with fake data.
+builder.Services.AddScoped<IMicrosoft365IntegrationService, Microsoft365IntegrationService>();
 
 builder.Services.AddScoped<PasswordExpiredWorkflow>();
 
 builder.Services.AddScoped<IPasswordService, MockPasswordService>();
 
 builder.Services.AddScoped<IExchangeIntegrationService, ExchangeIntegrationService>();
+
+// WBS 7.13b: logs alerts only until a notification channel is confirmed.
+builder.Services.AddScoped<IMailboxAlertNotifier, LoggingMailboxAlertNotifier>();
+
+// WBS 7.14: logs the approved action only until the real action is defined.
+builder.Services.AddScoped<IMailboxActionExecutor, LoggingMailboxActionExecutor>();
 
 var app = builder.Build();
 

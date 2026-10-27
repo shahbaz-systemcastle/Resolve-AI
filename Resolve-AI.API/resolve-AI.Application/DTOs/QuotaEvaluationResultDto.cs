@@ -1,10 +1,10 @@
 namespace resolve_AI.Application.DTOs;
 
 /// <summary>
-/// Result of quota evaluation (WBS 7.11).
+/// Result of quota evaluation (WBS 7.13).
 /// Decision is one of: ALERT_REQUIRED, NO_ALERT, NOT_EVALUATED.
 /// The decision only says whether an alert is needed; it does not
-/// set up an alert (7.12) or notify anyone (7.13).
+/// set up an alert (7.13a) or notify anyone (7.13b).
 /// </summary>
 public class QuotaEvaluationResultDto
 {

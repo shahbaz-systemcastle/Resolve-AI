@@ -3,7 +3,7 @@ using resolve_AI.Application.DTOs;
 namespace resolve_AI.Application.Validation;
 
 /// <summary>
-/// WBS 7.10 - Mailbox Capacity Analysis.
+/// WBS 7.12 - Mailbox Capacity Analysis.
 ///
 /// Pure logic: compares used mailbox storage with its quota.
 /// It performs no Microsoft 365 or Exchange calls.

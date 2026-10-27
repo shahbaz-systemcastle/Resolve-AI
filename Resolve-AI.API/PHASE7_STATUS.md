@@ -1,6 +1,6 @@
 # Phase 7 – License & Mailbox Management Module: Status and Handoff
 
-Last updated: 2026-10-13 (7.3 to 7.10 fixes applied, status codes added, UC-07 assignment tested on a test user)
+Last updated: 2026-10-24 (7.11 quota evaluation, 7.12 alert setup and 7.13 notification (log only) added; 7.3 to 7.10 tested earlier)
 Branch: `shahbaz/phase7-license-mailbox`
 Stack: ASP.NET Core, .NET 10, layered (API → Application → Infrastructure, shared Domain)
 
@@ -31,10 +31,14 @@ Assumed final (per product decision): the request contract in 7.1 and authentica
 ```
 Controller (Phase7TestController: POST /api/phase7-test/process)
   → Phase7WorkflowService.ProcessAsync(Phase7WorkflowRequestDto)
-      → IMicrosoft365IntegrationService   (real: Microsoft365IntegrationService | mock: MockMicrosoft365IntegrationService)
+      → IMicrosoft365IntegrationService   (Microsoft365IntegrationService, real Graph only)
       → Microsoft365LicenseStatusValidator (pure logic)
       → MailboxCapacityAnalyzer            (pure logic)
-  → Phase7WorkflowResultDto { RequestId, UseCase, Success, Status, Message, IsMock }
+      → QuotaEvaluator                     (pure logic, 7.13)
+      → MailboxAlertSetup                  (pure logic, 7.13a)
+      → IMailboxAlertNotifier              (7.13b; default LoggingMailboxAlertNotifier, logs only)
+  → Phase7WorkflowResultDto { RequestId, UseCase, Success, Status, Message, IsMock,
+                              QuotaEvaluation, Alert, AlertNotification }
 
 `IExchangeIntegrationService` (Windows PowerShell + certificate) is used only by `GET /exchange`.
 The workflow no longer depends on it.
@@ -43,30 +47,38 @@ The workflow no longer depends on it.
 Real vs mock is chosen at startup in `Resolve-AI.API/Program.cs`: if `AZURE_CLIENT_SECRET` is set,
 the real service is registered, otherwise the mock. `.env` is loaded with `../.env` relative to the
 working directory, so run the API from `Resolve-AI.API/Resolve-AI.API/`. If `.env` is not found the app
-silently falls back to the mock.
+no longer falls back to a mock: without `AZURE_*` values the Graph service throws a clear error.
 
-**Mock is outdated:** its license status has no `AssignedSkuIds`, so it never reports Business Premium.
-Mock UC-07 assignment therefore fails the 7.8 verification by design. Mock is not a valid test path.
+**Mock removed (2026-10-27):** `MockMicrosoft365IntegrationService` and `LicenseSkuTestController` were deleted, along with the mock-labelled test endpoints. Git history keeps them if needed.
 
 ---
 
 ## 3. WBS steps (current code)
 
-Step numbers follow the WBS list used in planning. Code comments use the same numbers, except the
-Exchange connection check, which is a precondition for UC-08 and not a WBS step of its own.
+Step numbers follow the WBS list. Code comments use the same numbers. Two extra steps, 7.13a and 7.13b
+(alert setup and notification), are not in the WBS. They are part of 7.13 validation.
 
-| WBS | Work | Code | Tested on real tenant |
+| WBS | Work | Code | Tested |
 |---|---|---|---|
-| 7.1 | Request intake (contract assumed final) | Test endpoint `POST /api/phase7-test/process` | Yes |
-| 7.2 | Request validation | `Phase7WorkflowService` (7.03 in comments) | Yes (`RequestId`, use case) |
-| 7.3 | Microsoft 365 availability | `CheckAvailabilityAsync` | Yes (`True`) |
-| 7.4 | User lookup (404 = not found, `accountEnabled` must be true) | `GetUserAsync` (selects `accountEnabled`, `usageLocation`) | Yes (found, not found, disabled: `USER_DISABLED`) |
-| 7.5 | License status (paged, Business Premium + Teams) | `GetLicenseStatusAsync` | Yes (already-licensed case) |
-| 7.6 | License validation | `Microsoft365LicenseStatusValidator` | Yes (already-licensed case) |
-| 7.7 | Approved license assignment (approval, usage location, seat and SKU guards) | `AssignLicenseAsync` + workflow | **Yes** on `rai.test01` (SPB assigned, Teams `Success`, confirmed in Graph). Usage-location and seat-full paths: code only |
-| 7.8 | Assignment verification (re-read up to 5 times, 5 s apart); unverified → `ASSIGNED_UNVERIFIED` | `WaitForLicenseAsync` in workflow | **Yes** on `rai.test01` (verified). Unverified path: code only |
-| 7.9 | Mailbox usage (Graph usage report `D7`, `Storage Used` vs `Prohibit Send/Receive Quota`, `Is Deleted` rows skipped) | `GetMailboxUsageAsync` | **Yes**: Hassan row found. `Is Deleted` filter: code only |
-| 7.10 | Capacity analysis (NORMAL < 80%, WARNING ≥ 80%, CRITICAL ≥ 90%, UNKNOWN if no quota) | `MailboxCapacityAnalyzer` | **Yes**: UC-08 returns `NORMAL`, 0.0% (correct for this mailbox) |
+| 7.01 | Workflow request mock | `Phase7WorkflowRequestMock` | Yes (used by test endpoints) |
+| 7.02 | Request reception | `POST /api/phase7-test/process` | Yes |
+| 7.03 | Request validation (RequestId, UserIdentifier, UseCase) | `Phase7WorkflowService` | Yes (real API: `VALIDATION_FAILED`) |
+| 7.04 | Microsoft 365 availability | `CheckAvailabilityAsync` | Yes (`True`) |
+| 7.05 | User lookup (404 = not found, `accountEnabled` must be true) | `GetUserAsync` (selects `accountEnabled`, `usageLocation`) | Yes (found, not found, disabled: `USER_DISABLED`) |
+| 7.06 | License status (paged, Business Premium + Teams) | `GetLicenseStatusAsync` | Yes (already-licensed case) |
+| 7.07 | License validation | `Microsoft365LicenseStatusValidator` | Yes (already-licensed case) |
+| 7.08 | Approved license assignment (approval, usage location, seat and SKU guards) | `AssignLicenseAsync` + workflow | **Yes** on `rai.test01` (SPB assigned, Teams `Success`, confirmed in Graph). Usage-location and seat-full paths: code only |
+| 7.09 | Assignment verification (re-read up to 5 times, 5 s apart); unverified → `ASSIGNED_UNVERIFIED` | `WaitForLicenseAsync` in workflow | **Yes** on `rai.test01` (verified). Unverified path: code only |
+| 7.10 | Exchange integration | `/exchange` check only. Not used by the workflow any more | `GET /exchange` returns `isAvailable: true` |
+| 7.11 | Mailbox usage (Graph usage report `D7`, `Storage Used` vs `Prohibit Send/Receive Quota`, `Is Deleted` rows skipped) | `GetMailboxUsageAsync` | **Yes**: Hassan row found. `Is Deleted` filter: code only |
+| 7.12 | Capacity analysis (NORMAL < 80%, WARNING ≥ 80%, CRITICAL ≥ 90%, UNKNOWN if no quota) | `MailboxCapacityAnalyzer` | **Yes**: UC-08 returns `NORMAL`, 0.0% (correct for this mailbox) |
+| 7.13 | Capacity validation: `ALERT_REQUIRED` (WARNING, CRITICAL), `NO_ALERT` (NORMAL), `NOT_EVALUATED` (UNKNOWN). Decision only | `QuotaEvaluator`, `Phase7WorkflowResultDto.QuotaEvaluation` | **Yes** on real tenant: `NORMAL` → `NO_ALERT`. WARNING/CRITICAL/UNKNOWN: simulation with fake Microsoft 365 data (real workflow code) |
+| 7.13a | Alert setup (extra, not in WBS): creates an `OPEN` alert record only when 7.13 says `ALERT_REQUIRED`. Not stored anywhere | `MailboxAlertSetup`, `Phase7WorkflowResultDto.Alert` | **Harness only** (fake usage): WARNING → threshold 80, CRITICAL → threshold 90, NORMAL and UNKNOWN → no alert |
+| 7.13b | Notification (extra, not in WBS) through `IMailboxAlertNotifier`. Default `LoggingMailboxAlertNotifier` logs only and returns `NOT_SENT` / `LOG`. No email or Teams message is sent | `LoggingMailboxAlertNotifier`, `Phase7WorkflowResultDto.AlertNotification` | **Harness only**: called once per alert, not called for NORMAL. Real channel not chosen yet |
+| 7.14 | Approved mailbox action (provisional, default parameters). Runs only when an alert exists and the request is approved. Default executor logs only: `LOGGED_ONLY`; not approved: `NOT_APPROVED` | `IMailboxActionExecutor`, `LoggingMailboxActionExecutor`, `Phase7WorkflowResultDto.MailboxAction` | **Harness only** (approved, not approved) |
+| 7.15 | Mailbox action result reception (provisional): wrong alert ID or unknown status → `FAILED` | `MailboxActionResultValidator` | **Harness only** (valid, wrong alert, unknown status) |
+| 7.16 | Technical result preparation: the `Phase7WorkflowResultDto` returned by the workflow | `Phase7WorkflowService` | Yes (message shows all steps) |
+| 7.17 | Orchestration result handoff | Not built | — |
 
 Exchange (not a workflow precondition any more): `ExchangeIntegrationService` (Windows PowerShell 5.1, `ExchangeOnlineManagement` 3.10.1).
 `GET /api/phase7-test/exchange` returns `HTTP 200, isAvailable: true`.
@@ -109,6 +121,8 @@ The UC-08 Exchange precondition was removed; UC-08 no longer depends on PowerShe
 **UC-08**
 - Usage not found → `MAILBOX_DATA_NOT_FOUND`.
 - Otherwise → `CAPACITY_ANALYSED` when state is NORMAL, WARNING or CRITICAL. `CAPACITY_UNKNOWN` only when quota is unknown.
+- Quota evaluation (7.13) is always in `QuotaEvaluation`. When the decision is `ALERT_REQUIRED`, `Alert` (7.13a) is set and `AlertNotification` (7.13b) is set. Otherwise both are `null`.
+- `Success` does not depend on the alert. An alert is a result of a successful analysis, not a failure.
 
 `IsMock` is taken from the integration DTOs that answered (not hardcoded in workflow).
 
@@ -139,8 +153,10 @@ Tenant setting: "Display concealed user, group, and site names in all reports" i
 | `GET /microsoft365-users` | Users list (per-user `isMock` is accurate) | Yes |
 | `POST /process` | Full workflow | Only read-only cases unless `isApproved = true` for an unlicensed user (**assigns a paid seat**) |
 | `GET /exchange` | Exchange precondition | Yes |
-| `GET /license-skus` | Tenant SKUs, seats, service plans | Yes |
-| `POST /microsoft365-license-assign` | Real `AssignLicenseAsync` with approval | **No** (paid seat) |
+| `GET /microsoft365-users` | Users list | Yes |
+| `POST /uc07`, `POST /uc08` | Built-in workflow requests (`test.user@mock.local`, returns `USER_NOT_FOUND` on the real tenant) | Yes, but use `/process` with a real user instead |
+
+Removed on 2026-10-27: `/microsoft365-user`, `/microsoft365-license*`, `/microsoft365-license-assign*`, `/license-skus`.
 
 Read-only flow on 2026-10-12 (all passed):
 1. Availability → `True`
@@ -163,7 +179,12 @@ Pushed to `origin/shahbaz/phase7-license-mailbox`:
 - `ea99132` Real Microsoft Graph integration for 7.3 to 7.7
 - `9acbdcf` Fixes: already-licensed case, lookup errors, SKU selection, `isMock` flag
 
+**Committed locally, not pushed** (branch is 2 commits ahead of origin):
+- `85b5dfd` UC-08 mailbox capacity, Exchange check, cleanup
+- `8c8e882` Quota evaluation (labelled 7.11 at the time; now 7.13)
+
 **Uncommitted on disk** (not committed or pushed):
+- 7.13a and 7.13b: `MailboxAlertSetup.cs`, `MailboxCapacityAlertDto.cs`, `MailboxAlertNotificationResultDto.cs`, `IMailboxAlertNotifier.cs`, `LoggingMailboxAlertNotifier.cs`; `Phase7WorkflowService.cs` and `Phase7WorkflowResultDto.cs` (alert fields); `Program.cs` (DI for the notifier)
 - Modified: `Program.cs`, `Phase7WorkflowService.cs`, `Phase7WorkflowResultDto.cs`, `Microsoft365UserDto.cs`, `Microsoft365IntegrationService.cs`, `MockMicrosoft365IntegrationService.cs`, `IMicrosoft365IntegrationService.cs`, `Microsoft365LicenseStatusDto.cs`, `Microsoft365LicenseStatusValidator.cs`
 - New: `Phase7Status.cs`, `ExchangeIntegrationService.cs`, `IExchangeIntegrationService.cs`, `ExchangeTestController.cs`, `LicenseSkuTestController.cs`, `MailboxUsageDto.cs`, `MailboxCapacityResultDto.cs`, `MailboxCapacityAnalyzer.cs`, `CLAUDE.md`, `PHASE7_STATUS.md`, `Resolve-AI-Exchange.cer`
 - Clutter to remove or ignore before commit: `*.bak` (4 files), `deck/`, `deck2/`, `outputs/`, `presentation.md`, `.claude/`
@@ -194,7 +215,17 @@ Not known: why that first hash was blocked and why earlier builds passed.
 - Report column names checked against the real report header.
 - Build: `0 Error(s)`.
 
+**Verified 2026-10-27** (live check script on the real tenant: 14 of 14 pass; `/uc07` returns `NO_ACTION_REQUIRED`, `/uc08` returns `CAPACITY_ANALYSED` / `NO_ALERT`; simulation in `tools/Phase7Simulation`: all 7 cases give the expected decision, alert, notification, action and result check):
+
+**Verified 2026-10-24** (build with current working tree, API on port 5087, since stopped):
+- Validation: empty `RequestId` and empty `UserIdentifier` → `VALIDATION_FAILED`; use case 5 → `VALIDATION_FAILED`.
+- User not found (`nobody@...`) → `USER_NOT_FOUND`.
+- UC-07 Hassan (already licensed) → `NO_ACTION_REQUIRED`, no assignment.
+- UC-08 Hassan → `CAPACITY_ANALYSED`, `NORMAL`, `NO_ALERT`, no alert, no notification.
+- 7.13, 7.13a and 7.13b with fake Microsoft 365 usage (simulation in `tools/Phase7Simulation`, real `Phase7WorkflowService`): 40% → no alert; 84% → WARNING alert, threshold 80, `OPEN`, notification `NOT_SENT` / `LOG`; 95% → CRITICAL alert, threshold 90; quota 0 → `CAPACITY_UNKNOWN`, no alert.
+
 **Not verified yet:**
+- 7.7 assignment and 7.8 verification on this run (Hassan already has the license; assigning would use a paid seat on a real user, needs approval or a new test user).
 - `USAGE_LOCATION_MISSING` path (needs a test user without usage location).
 - `ASSIGNED_UNVERIFIED` path (needs Graph to accept an assignment and then not show it).
 - `NO_FREE_SEATS` path (tenant has 23 free seats; would need full seats to test).
@@ -215,9 +246,9 @@ Not known: why that first hash was blocked and why earlier builds passed.
 3. **Capacity thresholds (80% / 90%) are provisional.** Business must confirm.
 4. **Graph usage report is delayed** (often about a day). Usage may be stale; a mailbox created today may show as not found.
 5. **Mock path is outdated** (see section 2).
-6. **`LicenseSkuTestController` bypasses DI** and builds its own Graph client.
+6. ~~`LicenseSkuTestController` bypasses DI~~ (removed 2026-10-27).
 7. **Step numbering in old class comments** (7.2 to 7.7) may still exist in other files.
-8. **Silent mock fallback** if `.env` is not found.
+8. ~~Silent mock fallback~~ (removed 2026-10-27; missing `.env` now gives a clear error).
 9. **Build warnings:** `Microsoft.OpenApi 2.0.0` known high severity (NU1903); `DotNetEnv` 3.1.2 resolved to 3.2.0 (NU1603).
 10. **Client secret rotation** still pending.
 11. **Graph `$select` rule:** `accountEnabled` and `usageLocation` only come back when selected. Any new user lookup must select them.
@@ -234,5 +265,7 @@ Not known: why that first hash was blocked and why earlier builds passed.
 3. **Negative paths:** test `USAGE_LOCATION_MISSING` and `ASSIGNED_UNVERIFIED` with test data (see section 8).
 4. Clean the working tree (remove `*.bak`, decide on `deck/`, `deck2/`, `outputs/`, `presentation.md`, `.claude/`), then commit and push.
 5. Rotate the client secret.
-6. Build 7.11 to 7.14 (quota evaluation, alerts, notifications, monitoring).
-7. Build 7.15 to 7.17 (result compilation, orchestration handoff, exit) once the contract is confirmed.
+6. Done in code: 7.13 (capacity validation), 7.13a and 7.13b (extra steps), 7.14 (default action), 7.15 (result check), 7.16 (technical result). Next: 7.17 handoff, only after WBS text is confirmed.
+7. Decide the real notification channel (email or Teams) and recipients before replacing `LoggingMailboxAlertNotifier`. Sending a message is an outward action and needs approval.
+8. Store alerts somewhere (currently only in the response). Needed for 7.14 monitoring and for the duplicate check.
+9. Build 7.17 (orchestration result handoff) once the WBS text is confirmed.

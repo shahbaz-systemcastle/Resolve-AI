@@ -1,7 +1,7 @@
 namespace resolve_AI.Application.DTOs;
 
 /// <summary>
-/// Mailbox storage usage for one user (WBS 7.9).
+/// Mailbox storage usage for one user (WBS 7.11).
 /// QuotaBytes of 0 means the quota is unknown.
 /// </summary>
 public class MailboxUsageDto

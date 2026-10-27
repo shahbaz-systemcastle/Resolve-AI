@@ -15,17 +15,15 @@ public static class Phase7WorkflowRequestMock
             RequestId = "MOCK-UC07-001",
             UseCase = UseCaseType.Microsoft365LicenseNotAssigned,
 
-            // MOCK/TBD:
-            // Replace when the final user identity contract is confirmed.
-            UserIdentifier = "test.user@mock.local",
+            // Known tenant user. Already licensed, so the call makes no change.
+            UserIdentifier = "HassanKhan@SystemCastle1.onmicrosoft.com",
 
             // MOCK/TBD:
             // Final tenant value/source is not confirmed.
             TenantIdentifier = "MOCK-TENANT",
 
-            // MOCK/TBD:
-            // Final approval model and rules are not confirmed.
-            IsApproved = true
+            // Not approved, so this endpoint can never assign a license.
+            IsApproved = false
         };
     }
 
@@ -36,17 +34,15 @@ public static class Phase7WorkflowRequestMock
             RequestId = "MOCK-UC08-001",
             UseCase = UseCaseType.MailboxCapacityThresholdAlert,
 
-            // MOCK/TBD:
-            // Replace when the final user identity contract is confirmed.
-            UserIdentifier = "test.user@mock.local",
+            // Known tenant user with a mailbox.
+            UserIdentifier = "HassanKhan@SystemCastle1.onmicrosoft.com",
 
             // MOCK/TBD:
             // Final tenant value/source is not confirmed.
             TenantIdentifier = "MOCK-TENANT",
 
-            // MOCK/TBD:
-            // Final approval model and rules are not confirmed.
-            IsApproved = true
+            // Not approved, so no approved mailbox action can run from this endpoint.
+            IsApproved = false
         };
     }
 }

@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using resolve_AI.Application.DTOs;
 using resolve_AI.Application.Interfaces;
-using resolve_AI.Application.Validation;
 
 namespace Resolve_AI.API.Controllers;
 
@@ -75,31 +74,32 @@ public class Phase7TestController : ControllerBase
         return Ok(result);
     }
 
-    // 7.3 - Microsoft 365 availability check
+    // 7.04 - Microsoft 365 availability check
 
     [HttpGet("microsoft365")]
     public async Task<IActionResult> TestMicrosoft365Integration()
     {
         var isAvailable =
             await _microsoft365IntegrationService
-                .CheckAvailabilityAsync("MOCK-TENANT");
+                .CheckAvailabilityAsync(null);
 
         return Ok(new
         {
             IsAvailable = isAvailable,
-            IsMock = true,
-            Message = "Microsoft 365 mock integration is available."
+            Message = isAvailable
+                ? "Microsoft 365 is available."
+                : "Microsoft 365 is not available."
         });
     }
 
-    // 7.3 - List All Users
+    // 7.05 - List all users (connection check)
 
     [HttpGet("microsoft365-users")]
     public async Task<IActionResult> TestMicrosoft365Users()
     {
         var users =
             await _microsoft365IntegrationService
-                .GetUsersListAsync("MOCK-TENANT");
+                .GetUsersListAsync(null);
 
         return Ok(new
         {
@@ -107,113 +107,5 @@ public class Phase7TestController : ControllerBase
             Users = users,
             Message = $"Retrieved {users.Count} users from Microsoft 365."
         });
-    }
-
-    // 7.4 - User Retrieval
-
-    [HttpGet("microsoft365-user")]
-    public async Task<IActionResult> TestMicrosoft365User()
-    {
-        var user =
-            await _microsoft365IntegrationService.GetUserAsync(
-                "test.user@mock.local",
-                "MOCK-TENANT");
-
-        return Ok(user);
-    }
-
-    // 7.5 - License Status Retrieval
-
-    [HttpGet("microsoft365-license")]
-    public async Task<IActionResult> TestMicrosoft365License()
-    {
-        var licenseStatus =
-            await _microsoft365IntegrationService
-                .GetLicenseStatusAsync(
-                    "test.user@mock.local",
-                    "MOCK-TENANT");
-
-        return Ok(licenseStatus);
-    }
-
-    // 7.6 - License Status Validation
-
-    [HttpGet("microsoft365-license-validation")]
-    public async Task<IActionResult> TestMicrosoft365LicenseValidation()
-    {
-        var licenseStatus =
-            await _microsoft365IntegrationService
-                .GetLicenseStatusAsync(
-                    "test.user@mock.local",
-                    "MOCK-TENANT");
-
-        var validationResult =
-            Microsoft365LicenseStatusValidator.Validate(licenseStatus);
-
-        return Ok(validationResult);
-    }
-
-    [HttpGet("microsoft365-license-validation-assigned")]
-    public IActionResult TestMicrosoft365LicenseValidationAssigned()
-    {
-        // MOCK/TBD:
-        // The current mock always returns HasAssignedLicense = false,
-        // so this temporary status is used only to exercise the
-        // "license already assigned" validation path.
-        var licenseStatus = new Microsoft365LicenseStatusDto
-        {
-            UserIdentifier = "test.user@mock.local",
-            HasAssignedLicense = true,
-            LicenseStatus = "License assigned - MOCK/TBD",
-            IsMock = true
-        };
-
-        var validationResult =
-            Microsoft365LicenseStatusValidator.Validate(licenseStatus);
-
-        return Ok(validationResult);
-    }
-
-    [HttpGet("microsoft365-license-validation-invalid")]
-    public IActionResult TestMicrosoft365LicenseValidationInvalid()
-    {
-        var licenseStatus = new Microsoft365LicenseStatusDto
-        {
-            UserIdentifier = string.Empty,
-            HasAssignedLicense = false,
-            LicenseStatus = "No license assigned - MOCK/TBD",
-            IsMock = true
-        };
-
-        var validationResult =
-            Microsoft365LicenseStatusValidator.Validate(licenseStatus);
-
-        return Ok(validationResult);
-    }
-
-    // 7.7 - License Assignment
-
-    [HttpPost("microsoft365-license-assign")]
-    public async Task<IActionResult> TestMicrosoft365LicenseAssign()
-    {
-        var assignmentResult =
-            await _microsoft365IntegrationService.AssignLicenseAsync(
-                "test.user@mock.local",
-                "MOCK-TENANT",
-                true);
-
-        return Ok(assignmentResult);
-    }
-
-    [HttpPost("microsoft365-license-assign-not-approved")]
-    public async Task<IActionResult> TestMicrosoft365LicenseAssignNotApproved()
-    {
-        var assignmentResult =
-            await _microsoft365IntegrationService.AssignLicenseAsync(
-                "test.user@mock.local",
-                "MOCK-TENANT",
-                false);
-
-        return Ok(assignmentResult);
     }
 }
