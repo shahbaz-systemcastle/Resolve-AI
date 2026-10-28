@@ -36,4 +36,8 @@ public interface IMicrosoft365IntegrationService
     Task<MailboxUsageDto> GetMailboxUsageAsync(
         string userIdentifier,
         string? tenantIdentifier);
+
+    // WBS 7.17 - License subscription snapshot (seat availability).
+    Task<LicenseSnapshotDto> GetLicenseSubscriptionSnapshotAsync(
+        string? tenantIdentifier);
 }

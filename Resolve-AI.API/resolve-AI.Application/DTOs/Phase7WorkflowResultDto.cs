@@ -42,6 +42,13 @@ public class Phase7WorkflowResultDto
     public MailboxActionResultDto? MailboxAction { get; set; }
 
     /// <summary>
+    /// License seat snapshot at workflow execution time (WBS 7.17).
+    /// Set for UC-07 results to show organization's seat availability.
+    /// Used for audit trail and Phase 4/8 reporting.
+    /// </summary>
+    public LicenseSnapshotDto? LicenseSnapshot { get; set; }
+
+    /// <summary>
     /// True when any Microsoft 365 answer used in this result came from the mock.
     /// </summary>
     public bool IsMock { get; set; } = false;

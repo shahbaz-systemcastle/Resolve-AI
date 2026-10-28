@@ -1,0 +1,17 @@
+Resolve-AI.API/scripts/phase7-live-check.ps1
+Resolve-AI.API/resolve-AI.Application/DTOs/LicenseSnapshotDto.cs
+Resolve-AI.API/resolve-AI.Application/DTOs/Phase7WorkflowResultDto.cs
+Resolve-AI.API/resolve-AI.Application/Interfaces/IPhase7HandoffService.cs
+Resolve-AI.API/resolve-AI.Infrastructure/Services/Phase7HandoffService.cs
+Resolve-AI.API/Resolve-AI.API/Program.cs
+Resolve-AI.API/resolve-AI.Application/Services/Phase7WorkflowService.cs
+Resolve-AI.API/resolve-AI.Application/Interfaces/IMicrosoft365IntegrationService.cs
+Resolve-AI.API/resolve-AI.Infrastructure/Services/Microsoft365IntegrationService.cs
+Resolve-AI.API/resolve-AI.Application/Services/Phase7WorkflowService.cs
+Resolve-AI.API/resolve-AI.Application/Services/Phase7WorkflowService.cs
+Resolve-AI.API/resolve-AI.Application/Services/Phase7WorkflowService.cs
+Resolve-AI.API/resolve-AI.Application/Services/Phase7WorkflowService.cs
+Resolve-AI.API/resolve-AI.Application/Services/Phase7WorkflowService.cs
+Resolve-AI.API/resolve-AI.Application/Services/Phase7WorkflowService.cs
+Resolve-AI.API/resolve-AI.Application/Services/Phase7WorkflowService.cs
+Resolve-AI.API/resolve-AI.Application/Services/Phase7WorkflowService.cs

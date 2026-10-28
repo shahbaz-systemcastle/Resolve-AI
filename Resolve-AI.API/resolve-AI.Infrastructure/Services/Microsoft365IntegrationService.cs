@@ -370,4 +370,51 @@ public class Microsoft365IntegrationService : IMicrosoft365IntegrationService
                 $"Business Premium assignment failed: {ex.Message}");
         }
     }
+
+    // WBS 7.17 - License subscription snapshot for audit trail.
+    public async Task<LicenseSnapshotDto> GetLicenseSubscriptionSnapshotAsync(
+        string? tenantIdentifier)
+    {
+        var skus = new List<Microsoft.Graph.Models.SubscribedSku>();
+        var page = await _graphClient.SubscribedSkus.GetAsync();
+
+        if (page?.Value == null)
+            throw new InvalidOperationException(
+                "Microsoft Graph did not return tenant licenses.");
+
+        skus.AddRange(page.Value);
+
+        while (!string.IsNullOrWhiteSpace(page.OdataNextLink))
+        {
+            page = await _graphClient.SubscribedSkus
+                .WithUrl(page.OdataNextLink).GetAsync();
+
+            if (page?.Value == null)
+                throw new InvalidOperationException(
+                    "Microsoft Graph did not return the next SKU page.");
+
+            skus.AddRange(page.Value);
+        }
+
+        var requiredSku = skus.FirstOrDefault(
+            sku => sku.SkuId == RequiredSkuId);
+
+        int totalSeats = 0;
+        int consumedSeats = 0;
+
+        if (requiredSku != null)
+        {
+            totalSeats = requiredSku.PrepaidUnits?.Enabled ?? 0;
+            consumedSeats = requiredSku.ConsumedUnits ?? 0;
+        }
+
+        return new LicenseSnapshotDto
+        {
+            TotalSeats = totalSeats,
+            ConsumedSeats = consumedSeats,
+            AvailableSeats = Math.Max(0, totalSeats - consumedSeats),
+            SnapshotAtUtc = DateTime.UtcNow,
+            IsMock = false
+        };
+    }
 }

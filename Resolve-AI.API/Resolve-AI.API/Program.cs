@@ -35,6 +35,9 @@ builder.Services.AddScoped<IMailboxAlertNotifier, LoggingMailboxAlertNotifier>()
 // WBS 7.14: logs the approved action only until the real action is defined.
 builder.Services.AddScoped<IMailboxActionExecutor, LoggingMailboxActionExecutor>();
 
+// WBS 7.17: orchestration handoff validation and logging.
+builder.Services.AddScoped<IPhase7HandoffService, Phase7HandoffService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

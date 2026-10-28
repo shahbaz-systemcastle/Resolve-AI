@@ -53,14 +53,18 @@ public class Phase7WorkflowService : IPhase7WorkflowService
 
     private readonly IMailboxActionExecutor _mailboxActionExecutor;
 
+    private readonly IPhase7HandoffService _handoffService;
+
     public Phase7WorkflowService(
         IMicrosoft365IntegrationService microsoft365IntegrationService,
         IMailboxAlertNotifier mailboxAlertNotifier,
-        IMailboxActionExecutor mailboxActionExecutor)
+        IMailboxActionExecutor mailboxActionExecutor,
+        IPhase7HandoffService handoffService)
     {
         _microsoft365IntegrationService = microsoft365IntegrationService;
         _mailboxAlertNotifier = mailboxAlertNotifier;
         _mailboxActionExecutor = mailboxActionExecutor;
+        _handoffService = handoffService;
     }
 
     public async Task<Phase7WorkflowResultDto> ProcessAsync(
@@ -150,11 +154,12 @@ public class Phase7WorkflowService : IPhase7WorkflowService
 
             if (request.UseCase == UseCaseType.MailboxCapacityThresholdAlert)
             {
-                return await ProcessMailboxCapacityAsync(
+                var result = await ProcessMailboxCapacityAsync(
                     request,
                     user.UserIdentifier,
                     request.TenantIdentifier,
                     usesMock);
+                return await FinalizeResultAsync(result);
             }
 
             // 7.06 - License Status Retrieval
@@ -180,15 +185,29 @@ public class Phase7WorkflowService : IPhase7WorkflowService
             // The user already has a license, so no action is taken.
             if (!licenseValidation.LicenseActionRequired)
             {
-                return new Phase7WorkflowResultDto
+                // 7.17 - Capture license snapshot even when no action is needed
+                LicenseSnapshotDto? noActionSnapshot = null;
+                try
+                {
+                    noActionSnapshot = await _microsoft365IntegrationService
+                        .GetLicenseSubscriptionSnapshotAsync(request.TenantIdentifier);
+                }
+                catch
+                {
+                    // Snapshot is not critical, continue without it
+                }
+
+                var noActionResult = new Phase7WorkflowResultDto
                 {
                     RequestId = request.RequestId,
                     UseCase = request.UseCase,
                     Success = true,
                     Status = Phase7Status.NoActionRequired,
                     Message = licenseValidation.Message,
-                    IsMock = usesMock
+                    IsMock = usesMock,
+                    LicenseSnapshot = noActionSnapshot
                 };
+                return await FinalizeResultAsync(noActionResult);
             }
 
             // 7.08 - Approved License Action Execution
@@ -233,11 +252,23 @@ public class Phase7WorkflowService : IPhase7WorkflowService
                 request.UserIdentifier,
                 request.TenantIdentifier);
 
+            // 7.17 - Capture license snapshot for audit trail
+            LicenseSnapshotDto? licenseSnapshot = null;
+            try
+            {
+                licenseSnapshot = await _microsoft365IntegrationService
+                    .GetLicenseSubscriptionSnapshotAsync(request.TenantIdentifier);
+            }
+            catch
+            {
+                // Snapshot is not critical, continue without it
+            }
+
             if (verifiedStatus == null)
             {
                 // Microsoft 365 accepted the assignment, so the license may
                 // exist. This is reported as UNVERIFIED, not as a plain failure.
-                return new Phase7WorkflowResultDto
+                var unverifiedResult = new Phase7WorkflowResultDto
                 {
                     RequestId = request.RequestId,
                     UseCase = request.UseCase,
@@ -246,11 +277,13 @@ public class Phase7WorkflowService : IPhase7WorkflowService
                     Message = "Assignment was accepted by Microsoft 365, but the "
                               + $"license was not visible after {VerificationAttempts} "
                               + "checks. Check the license state before any retry.",
-                    IsMock = usesMock
+                    IsMock = usesMock,
+                    LicenseSnapshot = licenseSnapshot
                 };
+                return await FinalizeResultAsync(unverifiedResult);
             }
 
-            return new Phase7WorkflowResultDto
+            var completedResult = new Phase7WorkflowResultDto
             {
                 RequestId = request.RequestId,
                 UseCase = request.UseCase,
@@ -258,10 +291,11 @@ public class Phase7WorkflowService : IPhase7WorkflowService
                 Status = Phase7Status.Completed,
                 Message = $"User '{user.DisplayName}' resolved. "
                           + assignmentResult.Message
-                          + " License verified: Business Premium with active Teams. "
-                          + "(WBS 7.17 pending.)",
-                IsMock = usesMock
+                          + " License verified: Business Premium with active Teams.",
+                IsMock = usesMock,
+                LicenseSnapshot = licenseSnapshot
             };
+            return await FinalizeResultAsync(completedResult);
         }
         catch (Exception ex)
         {
@@ -348,8 +382,7 @@ public class Phase7WorkflowService : IPhase7WorkflowService
             Message = capacity.Message + " " + quotaEvaluation.Message
                       + (alert == null ? "" : $" Alert {alert.AlertId} is {alert.Status}; "
                           + $"notification {notification!.Status}; "
-                          + $"mailbox action {action!.Status}.")
-                      + " (WBS 7.17 pending.)",
+                          + $"mailbox action {action!.Status}."),
             QuotaEvaluation = quotaEvaluation,
             Alert = alert,
             AlertNotification = notification,
@@ -359,6 +392,13 @@ public class Phase7WorkflowService : IPhase7WorkflowService
     }
 
     // 7.09 - Re-reads the license until Business Premium with Teams is visible.
+    // 7.17 - Orchestration Result Handoff
+    private async Task<Phase7WorkflowResultDto> FinalizeResultAsync(
+        Phase7WorkflowResultDto result)
+    {
+        return await _handoffService.PrepareHandoffAsync(result);
+    }
+
     private async Task<Microsoft365LicenseStatusDto?> WaitForLicenseAsync(
         string userIdentifier,
         string? tenantIdentifier)

@@ -1,0 +1,19 @@
+{
+  "v": 4,
+  "createdOnFiles": { "v": 1, "at": "2026-09-26T12:00:00Z" },
+  "title": "AI Meeting Assistant - Project Proposal",
+  "order": ["cover", "problem", "solution", "flow", "step-record", "step-transcribe", "step-summarize", "step-action", "features", "benefits", "roi", "techstack", "costs", "timeline", "vs-zoom", "next-steps"],
+  "sections": {
+    "intro": { "description": "Why this matters and what we are proposing", "start": "cover" },
+    "problem": { "description": "The problem meetings create today", "start": "problem" },
+    "howitworks": { "description": "How the product works, step by step", "start": "solution" },
+    "value": { "description": "Features, benefits and financial impact", "start": "features" },
+    "plan": { "description": "Technology, cost, timeline and comparison with Zoom", "start": "techstack" },
+    "close": { "description": "Next steps and closing", "start": "next-steps" }
+  },
+  "faces": {
+    "space-grotesk": { "family": "Space Grotesk", "href": "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap" },
+    "inter": { "family": "Inter", "href": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" }
+  },
+  "designSystems": []
+}
