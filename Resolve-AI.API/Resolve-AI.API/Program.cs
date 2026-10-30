@@ -38,6 +38,10 @@ builder.Services.AddScoped<IMailboxActionExecutor, LoggingMailboxActionExecutor>
 // WBS 7.17: orchestration handoff validation and logging.
 builder.Services.AddScoped<IPhase7HandoffService, Phase7HandoffService>();
 
+// WBS 8.12-8.22: Phase 8 - Result and Logging Module.
+// Stores requests, results, and audit logs for compliance and reporting.
+builder.Services.AddScoped<IPhase8StorageService, Phase8StorageService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

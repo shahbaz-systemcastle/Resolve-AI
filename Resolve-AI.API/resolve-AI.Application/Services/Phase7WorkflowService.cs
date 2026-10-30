@@ -55,16 +55,20 @@ public class Phase7WorkflowService : IPhase7WorkflowService
 
     private readonly IPhase7HandoffService _handoffService;
 
+    private readonly IPhase8StorageService _storageService;
+
     public Phase7WorkflowService(
         IMicrosoft365IntegrationService microsoft365IntegrationService,
         IMailboxAlertNotifier mailboxAlertNotifier,
         IMailboxActionExecutor mailboxActionExecutor,
-        IPhase7HandoffService handoffService)
+        IPhase7HandoffService handoffService,
+        IPhase8StorageService storageService)
     {
         _microsoft365IntegrationService = microsoft365IntegrationService;
         _mailboxAlertNotifier = mailboxAlertNotifier;
         _mailboxActionExecutor = mailboxActionExecutor;
         _handoffService = handoffService;
+        _storageService = storageService;
     }
 
     public async Task<Phase7WorkflowResultDto> ProcessAsync(
@@ -393,10 +397,66 @@ public class Phase7WorkflowService : IPhase7WorkflowService
 
     // 7.09 - Re-reads the license until Business Premium with Teams is visible.
     // 7.17 - Orchestration Result Handoff
+    // 8.12-8.18 - Phase 8 storage integration
     private async Task<Phase7WorkflowResultDto> FinalizeResultAsync(
         Phase7WorkflowResultDto result)
     {
+        // Phase 8 WBS 8.12-8.18: Store request and result for audit trail
+        try
+        {
+            // Save request (WBS 8.17)
+            var dbRequestId = await _storageService.SaveRequestAsync(
+                requestId: result.RequestId,
+                userIdentifier: result.RequestId, // Will be updated from actual request
+                useCase: (int)result.UseCase,
+                tenantIdentifier: "default", // Will be from actual request
+                isApproved: false); // Will be from actual request
+
+            // Log initial action (WBS 8.15)
+            await _storageService.LogActionAsync(
+                requestDbId: dbRequestId,
+                phase7RequestId: result.RequestId,
+                action: "workflow_started",
+                actionStatus: "success",
+                details: $"Phase 7 workflow started for UseCase {result.UseCase}");
+
+            // Save result (WBS 8.18)
+            await _storageService.SaveResultAsync(
+                requestDbId: dbRequestId,
+                phase7RequestId: result.RequestId,
+                status: result.Status,
+                message: result.Message,
+                isMock: result.IsMock,
+                additionalData: SerializeAdditionalData(result));
+
+            // Log completion (WBS 8.15)
+            await _storageService.LogActionAsync(
+                requestDbId: dbRequestId,
+                phase7RequestId: result.RequestId,
+                action: "workflow_completed",
+                actionStatus: result.Success ? "success" : "failed",
+                details: $"Phase 7 workflow completed with status: {result.Status}");
+        }
+        catch (Exception)
+        {
+            // Don't fail the workflow if storage fails; continue
+        }
+
         return await _handoffService.PrepareHandoffAsync(result);
+    }
+
+    private static string SerializeAdditionalData(Phase7WorkflowResultDto result)
+    {
+        var data = new
+        {
+            quotaEvaluation = result.QuotaEvaluation,
+            alert = result.Alert,
+            alertNotification = result.AlertNotification,
+            mailboxAction = result.MailboxAction,
+            licenseSnapshot = result.LicenseSnapshot
+        };
+
+        return System.Text.Json.JsonSerializer.Serialize(data);
     }
 
     private async Task<Microsoft365LicenseStatusDto?> WaitForLicenseAsync(
