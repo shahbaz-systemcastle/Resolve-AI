@@ -5,7 +5,8 @@ using resolve_AI.Infrastructure.Services;
 using DotNetEnv;
 
 // Load .env file for Azure credentials
-DotNetEnv.Env.Load("../.env");
+var envPath = Path.Combine(Directory.GetCurrentDirectory(), "..", ".env");
+DotNetEnv.Env.Load(envPath);
 
 var builder = WebApplication.CreateBuilder(args);
 
