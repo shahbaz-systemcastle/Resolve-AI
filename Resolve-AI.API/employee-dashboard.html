@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoResolve-AI - Employee Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', -apple-system, sans-serif; background: #f5f5f5; color: #1a1a1a; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+        .header { background: white; border-bottom: 1px solid #e0e0e0; padding: 20px 28px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+        .header-title { font-size: 20px; font-weight: 800; color: #1a1a1a; }
+        .logout-btn { background: #1e40af; color: white; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+        .main-content { display: flex; flex-direction: column; gap: 16px; flex: 1; padding: 40px 28px; overflow: hidden; min-height: 0; }
+        .dashboard-left { overflow-y: auto; overflow-x: hidden; flex: 1; min-height: 0; }
+        .chat-right { background: white; border: 1px solid #e0e0e0; border-radius: 12px; display: none; flex-direction: column; overflow: hidden; width: 100%; height: 350px; }
+        .chat-right.active { display: flex; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 40px; }
+        .stat-card { background: #f0f4fa; border: 2px solid #829CBC; border-radius: 12px; padding: 24px; text-align: center; box-shadow: 0 2px 8px rgba(31, 72, 126, 0.1); }
+        .stat-icon { font-size: 32px; margin-bottom: 12px; }
+        .stat-label { color: #666666; font-size: 12px; margin-bottom: 8px; }
+        .stat-value { font-size: 28px; font-weight: 700; color: #1F487E; }
+        .section { background: #f0f4fa; border: 2px solid #829CBC; border-radius: 12px; padding: 32px; margin-bottom: 32px; box-shadow: 0 2px 8px rgba(31, 72, 126, 0.1); }
+        .section-title { font-size: 20px; font-weight: 700; margin-bottom: 24px; color: #1D3461; }
+        .launch-btn { background: #1F487E; color: white; border: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; cursor: pointer; margin-bottom: 24px; }
+        .tickets-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+        .ticket-card { background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 12px; padding: 20px; cursor: pointer; }
+        .ticket-header { display: flex; justify-content: space-between; margin-bottom: 12px; }
+        .ticket-id { color: #1F487E; font-weight: 600; font-size: 12px; }
+        .ticket-status { padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+        .status-in-progress { background: #d1ecf1; color: #1D3461; }
+        .status-resolved { background: #d4edda; color: #1D3461; }
+        .ticket-title { font-size: 14px; font-weight: 600; margin-bottom: 12px; color: #1D3461; }
+        .ticket-action { background: rgba(31, 72, 126, 0.1); color: #1F487E; border: none; padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; width: 100%; }
+        .tab-buttons { display: flex; gap: 12px; margin-bottom: 24px; }
+        .tab-btn { background: #829CBC; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+        .tab-btn.active { background: #1F487E; color: white; }
+        .chat-messages { flex: 1; padding: 16px; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; gap: 12px; }
+        .message { padding: 12px 16px; border-radius: 8px; max-width: 100%; word-wrap: break-word; }
+        .message.user { background: #1F487E; color: white; align-self: flex-end; }
+        .message.agent { background: #f9f9f9; color: #1a1a1a; border: 1px solid #829CBC; }
+        .chat-input { padding: 12px; border-top: 1px solid #829CBC; display: flex; gap: 12px; flex-shrink: 0; }
+        .chat-input input { flex: 1; padding: 10px; background: white; border: 1px solid #829CBC; border-radius: 6px; color: #1a1a1a; font-size: 13px; }
+        .chat-input button { background: #1F487E; color: white; border: none; padding: 10px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <svg width="36" height="36" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <path d="M 15 65 L 50 25 L 85 65" stroke="#2d3748" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M 65 28 L 80 12 M 80 12 L 80 32 M 80 12 L 60 12" stroke="#ff8c42" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                <polygon points="80,12 75,20 85,18" fill="#ff8c42"/>
+                <circle cx="40" cy="50" r="3" fill="#ff8c42"/>
+                <circle cx="50" cy="68" r="3" fill="#ff8c42"/>
+                <circle cx="60" cy="50" r="3" fill="#ff8c42"/>
+                <line x1="40" y1="50" x2="50" y2="68" stroke="#ff8c42" stroke-width="2" opacity="0.7"/>
+                <line x1="50" y1="68" x2="60" y2="50" stroke="#ff8c42" stroke-width="2" opacity="0.7"/>
+            </svg>
+            <div class="header-title">AutoResolve-AI</div>
+        </div>
+        <div style="display: flex; gap: 16px; align-items: center;">
+            <span>👤 john.smith@company.com</span>
+            <button class="logout-btn" onclick="alert('Logged out! Go to: login.html')">Logout</button>
+        </div>
+    </div>
+
+    <div class="main-content" id="mainContent">
+        <div class="dashboard-left">
+            <h2 style="margin-bottom: 32px;">Welcome Back, John! 👋</h2>
+
+            <div class="tab-buttons" style="margin-bottom: 24px;">
+                <button class="tab-btn active" onclick="toggleChat('off')">📊 Dashboard</button>
+                <button class="tab-btn" onclick="toggleChat('on')" id="chatToggleBtn">💬 Live Support Chat</button>
+            </div>
+
+            <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">📊</div>
+                <div class="stat-label">Total Requests</div>
+                <div class="stat-value">12</div>
+                <div style="color: #68d391; font-size: 12px; margin-top: 8px;">All time</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🔓</div>
+                <div class="stat-label">Open Requests</div>
+                <div class="stat-value">3</div>
+                <div style="color: #f6ad55; font-size: 12px; margin-top: 8px;">Waiting</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <div class="stat-label">Resolved</div>
+                <div class="stat-value">9</div>
+                <div style="color: #68d391; font-size: 12px; margin-top: 8px;">Completed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">⏱️</div>
+                <div class="stat-label">Avg Response</div>
+                <div class="stat-value">2.5m</div>
+                <div style="color: #4299e1; font-size: 12px; margin-top: 8px;">Minutes</div>
+            </div>
+        </div>
+
+            <div id="dashboardTab">
+
+            <!-- Support Channel Statistics -->
+            <div class="section">
+                <div class="section-title">📊 Support Channel Statistics</div>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+                    <div style="background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 12px; padding: 16px;">
+                        <div style="font-size: 18px; margin-bottom: 12px; color: #1a1a1a;">👥 Microsoft Teams</div>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <div style="display: flex; justify-content: space-between;"><span style="color: #666666;">✅ Resolved:</span><span style="font-weight: 700; color: #28a745;">156</span></div>
+                            <div style="display: flex; justify-content: space-between;"><span style="color: #666666;">⏳ Pending:</span><span style="font-weight: 700; color: #ffc107;">12</span></div>
+                            <div style="display: flex; justify-content: space-between;"><span style="color: #666666;">🔴 Escalation:</span><span style="font-weight: 700; color: #dc3545;">3</span></div>
+                        </div>
+                    </div>
+
+                    <div style="background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 12px; padding: 16px;">
+                        <div style="font-size: 18px; margin-bottom: 12px; color: #1a1a1a;">☎️ Phone Support</div>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <div style="display: flex; justify-content: space-between;"><span style="color: #666666;">✅ Resolved:</span><span style="font-weight: 700; color: #28a745;">342</span></div>
+                            <div style="display: flex; justify-content: space-between;"><span style="color: #666666;">⏳ Pending:</span><span style="font-weight: 700; color: #ffc107;">8</span></div>
+                            <div style="display: flex; justify-content: space-between;"><span style="color: #666666;">🔴 Escalation:</span><span style="font-weight: 700; color: #dc3545;">1</span></div>
+                        </div>
+                    </div>
+
+                    <div style="background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 12px; padding: 16px;">
+                        <div style="font-size: 18px; margin-bottom: 12px; color: #1a1a1a;">🌐 Web Portal</div>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <div style="display: flex; justify-content: space-between;"><span style="color: #666666;">✅ Resolved:</span><span style="font-weight: 700; color: #28a745;">278</span></div>
+                            <div style="display: flex; justify-content: space-between;"><span style="color: #666666;">⏳ Pending:</span><span style="font-weight: 700; color: #ffc107;">15</span></div>
+                            <div style="display: flex; justify-content: space-between;"><span style="color: #666666;">🔴 Escalation:</span><span style="font-weight: 700; color: #dc3545;">5</span></div>
+                        </div>
+                    </div>
+
+                    <div style="background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 12px; padding: 16px;">
+                        <div style="font-size: 18px; margin-bottom: 12px; color: #1a1a1a;">🚶 Walk-in Support</div>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <div style="display: flex; justify-content: space-between;"><span style="color: #666666;">✅ Resolved:</span><span style="font-weight: 700; color: #28a745;">89</span></div>
+                            <div style="display: flex; justify-content: space-between;"><span style="color: #666666;">⏳ Pending:</span><span style="font-weight: 700; color: #ffc107;">5</span></div>
+                            <div style="display: flex; justify-content: space-between;"><span style="color: #666666;">🔴 Escalation:</span><span style="font-weight: 700; color: #dc3545;">2</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">My Support Requests</div>
+                <button class="launch-btn" onclick="alert('🎫 Launch new ticket form')">+ Launch New Ticket</button>
+
+                <div class="tickets-grid">
+                <div class="ticket-card">
+                    <div class="ticket-header">
+                        <div class="ticket-id">TIK-001</div>
+                        <div class="ticket-status status-in-progress">In Progress</div>
+                    </div>
+                    <div class="ticket-title">M365 License Assignment</div>
+                    <div style="color: #a0aec0; font-size: 12px; margin-bottom: 12px;">2 min ago</div>
+                    <button class="ticket-action" onclick="alert('💬 Chat opened for TIK-001')">💬 View Chat</button>
+                </div>
+
+                <div class="ticket-card">
+                    <div class="ticket-header">
+                        <div class="ticket-id">TIK-002</div>
+                        <div class="ticket-status status-resolved">Resolved</div>
+                    </div>
+                    <div class="ticket-title">Password Reset</div>
+                    <div style="color: #a0aec0; font-size: 12px; margin-bottom: 12px;">15 min ago</div>
+                    <button class="ticket-action" onclick="alert('💬 Chat opened for TIK-002')">💬 View Chat</button>
+                </div>
+
+                <div class="ticket-card">
+                    <div class="ticket-header">
+                        <div class="ticket-id">TIK-003</div>
+                        <div class="ticket-status status-resolved">Resolved</div>
+                    </div>
+                    <div class="ticket-title">Mailbox Setup</div>
+                    <div style="color: #a0aec0; font-size: 12px; margin-bottom: 12px;">1 hour ago</div>
+                    <button class="ticket-action" onclick="alert('💬 Chat opened for TIK-003')">💬 View Chat</button>
+                </div>
+            </div>
+            </div>
+        </div>
+
+        <div class="chat-right">
+            <div style="text-align: center; padding: 12px; border-bottom: 1px solid #2d3748;">
+                <h3 style="font-size: 14px; font-weight: 700; margin-bottom: 2px;">💬 Live Support</h3>
+                <p style="color: #a0aec0; font-size: 11px;">Connected with agent</p>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="message agent">
+                    <strong>Support Agent:</strong> Hello! How can I help?
+                </div>
+            </div>
+            <div class="chat-input">
+                <input type="text" id="chatInput" placeholder="Type message..." onkeypress="handleChatKeypress(event)" />
+                <button onclick="sendChatMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleChat(state) {
+            const chatRight = document.querySelector('.chat-right');
+            const dashBtn = document.querySelectorAll('.tab-btn')[0];
+            const chatBtn = document.querySelectorAll('.tab-btn')[1];
+
+            if (state === 'on') {
+                chatRight.classList.add('active');
+                dashBtn.classList.remove('active');
+                chatBtn.classList.add('active');
+                // Scroll to chat
+                setTimeout(() => {
+                    chatRight.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 100);
+            } else {
+                chatRight.classList.remove('active');
+                dashBtn.classList.add('active');
+                chatBtn.classList.remove('active');
+            }
+        }
+
+        function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            const messagesDiv = document.getElementById('chatMessages');
+
+            // Add user message
+            const userMsg = document.createElement('div');
+            userMsg.className = 'message user';
+            userMsg.textContent = message;
+            messagesDiv.appendChild(userMsg);
+
+            // Clear input
+            input.value = '';
+
+            // Auto reply after 1 second
+            setTimeout(() => {
+                const agentMsg = document.createElement('div');
+                agentMsg.className = 'message agent';
+                agentMsg.innerHTML = '<strong>Support Agent:</strong> Got it! I am working on it.';
+                messagesDiv.appendChild(agentMsg);
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            }, 1000);
+
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function handleChatKeypress(event) {
+            if (event.key === 'Enter') {
+                sendChatMessage();
+            }
+        }
+    </script>
+</body>
+</html>
