@@ -117,3 +117,6 @@ Resolve-AI.API/resolve-AI.Infrastructure/Services/Phase4/Phase7ExecutionProxy.cs
 Resolve-AI.API/resolve-AI.Infrastructure/Services/Phase4/Phase7ExecutionProxy.cs
 Resolve-AI.API/resolve-AI.Infrastructure/Services/Phase4/Phase7ExecutionProxy.cs
 Resolve-AI.API/resolve-AI.Infrastructure/Services/Phase4/Phase7ExecutionProxy.cs
+Resolve-AI.API/resolve-AI.Application/DTOs/EnterpriseServiceRequestDto.cs
+Resolve-AI.API/resolve-AI.Application/DTOs/EnterpriseServiceResultDto.cs
+Resolve-AI.API/resolve-AI.Infrastructure/Services/Phase4/Phase7ExecutionProxy.cs
