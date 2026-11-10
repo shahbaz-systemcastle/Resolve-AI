@@ -29,15 +29,23 @@ public class Phase7ExecutionProxy : IPhase7ExecutionProxy
                 IsApproved = true
             };
 
-            var result = await _phase7Service.ProcessAsync(phase7Request);
+            var phase7Result = await _phase7Service.ProcessAsync(phase7Request);
+
+            var operationId = Guid.Parse(request.Id);
+            var enterpriseResult = EnterpriseServiceResultDto.FromPhase7Result(phase7Result, operationId);
 
             return new ExecutionResult
             {
                 RequestId = request.Id,
                 PhaseNumber = 7,
-                Status = result.Status,
-                Data = System.Text.Json.JsonSerializer.Serialize(new { result.Success, result.Message }),
-                Error = result.Success ? null : result.Message,
+                Status = enterpriseResult.Status,
+                Data = System.Text.Json.JsonSerializer.Serialize(new
+                {
+                    enterpriseResult.Status,
+                    enterpriseResult.OutcomeCode,
+                    enterpriseResult.VerificationEvidenceReference
+                }),
+                Error = enterpriseResult.Status == "SucceededVerified" ? null : enterpriseResult.OutcomeCode,
                 ExecutedAt = DateTime.UtcNow
             };
         }
