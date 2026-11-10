@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoResolve-AI Color Palette</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: #f5f5f5;
+            color: #1a1a1a;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 32px;
+            color: #1F487E;
+        }
+        .section { margin-bottom: 50px; }
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #1F487E;
+        }
+        .colors-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        .color-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .color-sample {
+            height: 120px;
+            width: 100%;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .color-info {
+            padding: 16px;
+        }
+        .color-name {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: #1a1a1a;
+        }
+        .color-code {
+            font-family: monospace;
+            font-size: 12px;
+            color: #666666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 AutoResolve-AI Color Palette</h1>
+
+        <!-- Primary Colors -->
+        <div class="section">
+            <div class="section-title">Primary Colors</div>
+            <div class="colors-grid">
+                <div class="color-card">
+                    <div class="color-sample" style="background: #0f1419;"></div>
+                    <div class="color-info">
+                        <div class="color-name">Background</div>
+                        <div class="color-code">#0f1419</div>
+                    </div>
+                </div>
+                <div class="color-card">
+                    <div class="color-sample" style="background: #1a1f2e;"></div>
+                    <div class="color-info">
+                        <div class="color-name">Cards/Sidebar</div>
+                        <div class="color-code">#1a1f2e</div>
+                    </div>
+                </div>
+                <div class="color-card">
+                    <div class="color-sample" style="background: #131820;"></div>
+                    <div class="color-info">
+                        <div class="color-name">Darker Elements</div>
+                        <div class="color-code">#131820</div>
+                    </div>
+                </div>
+                <div class="color-card">
+                    <div class="color-sample" style="background: #2d3748;"></div>
+                    <div class="color-info">
+                        <div class="color-name">Borders</div>
+                        <div class="color-code">#2d3748</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Accent Colors -->
+        <div class="section">
+            <div class="section-title">Accent Colors</div>
+            <div class="colors-grid">
+                <div class="color-card">
+                    <div class="color-sample" style="background: linear-gradient(135deg, #667eea, #764ba2);"></div>
+                    <div class="color-info">
+                        <div class="color-name">Primary Gradient</div>
+                        <div class="color-code">#667eea → #764ba2</div>
+                    </div>
+                </div>
+                <div class="color-card">
+                    <div class="color-sample" style="background: #667eea;"></div>
+                    <div class="color-info">
+                        <div class="color-name">Purple Primary</div>
+                        <div class="color-code">#667eea</div>
+                    </div>
+                </div>
+                <div class="color-card">
+                    <div class="color-sample" style="background: #764ba2;"></div>
+                    <div class="color-info">
+                        <div class="color-name">Purple Secondary</div>
+                        <div class="color-code">#764ba2</div>
+                    </div>
+                </div>
+                <div class="color-card">
+                    <div class="color-sample" style="background: #e4e6eb;"></div>
+                    <div class="color-info">
+                        <div class="color-name">Text Light</div>
+                        <div class="color-code">#e4e6eb</div>
+                    </div>
+                </div>
+                <div class="color-card">
+                    <div class="color-sample" style="background: #a0aec0;"></div>
+                    <div class="color-info">
+                        <div class="color-name">Text Secondary</div>
+                        <div class="color-code">#a0aec0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Colors -->
+        <div class="section">
+            <div class="section-title">Status Colors</div>
+            <div class="colors-grid">
+                <div class="color-card">
+                    <div class="color-sample" style="background: #68d391;"></div>
+                    <div class="color-info">
+                        <div class="color-name">✅ Success</div>
+                        <div class="color-code">#68d391</div>
+                    </div>
+                </div>
+                <div class="color-card">
+                    <div class="color-sample" style="background: #f6ad55;"></div>
+                    <div class="color-info">
+                        <div class="color-name">⏳ Pending</div>
+                        <div class="color-code">#f6ad55</div>
+                    </div>
+                </div>
+                <div class="color-card">
+                    <div class="color-sample" style="background: #fc8181;"></div>
+                    <div class="color-info">
+                        <div class="color-name">🔴 Escalation</div>
+                        <div class="color-code">#fc8181</div>
+                    </div>
+                </div>
+                <div class="color-card">
+                    <div class="color-sample" style="background: #4299e1;"></div>
+                    <div class="color-info">
+                        <div class="color-name">🔵 Info</div>
+                        <div class="color-code">#4299e1</div>
+                    </div>
+                </div>
+                <div class="color-card">
+                    <div class="color-sample" style="background: #90cdf4;"></div>
+                    <div class="color-info">
+                        <div class="color-name">⚙️ In Progress</div>
+                        <div class="color-code">#90cdf4</div>
+                    </div>
+                </div>
+                <div class="color-card">
+                    <div class="color-sample" style="background: #9ae6b4;"></div>
+                    <div class="color-info">
+                        <div class="color-name">✓ Resolved</div>
+                        <div class="color-code">#9ae6b4</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Theme Info -->
+        <div class="section" style="background: white; border: 1px solid #e0e0e0; border-radius: 12px; padding: 24px;">
+            <h3 style="color: #1e40af; margin-bottom: 16px;">🎨 Theme Summary</h3>
+            <ul style="list-style: none; color: #666666; line-height: 1.8;">
+                <li>✓ Light Theme - Clean & Professional</li>
+                <li>✓ Blue Primary Accent (#1e40af) - Modern</li>
+                <li>✓ Yellow Secondary Accent (#ffc107) - Highlights</li>
+                <li>✓ Clear Status Colors - Easy Recognition</li>
+                <li>✓ Consistent Across All Dashboards</li>
+                <li>✓ WCAG Accessible Color Contrast</li>
+                <li>✓ Orange Logo (#ff8c42) - Brand Identity</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
