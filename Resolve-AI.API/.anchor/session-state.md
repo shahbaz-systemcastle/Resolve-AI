@@ -1,6 +1,6 @@
 # Session state (auto-saved — last known reality)
 
-_Updated: 2026-11-11 13:14:02_  ·  branch: `shahbaz/phase7-license-mailbox`
+_Updated: 2026-11-11 13:28:05_  ·  branch: `shahbaz/phase7-license-mailbox`
 
 ## Uncommitted changes
 ```
@@ -10,21 +10,21 @@ _Updated: 2026-11-11 13:14:02_  ·  branch: `shahbaz/phase7-license-mailbox`
 
 Diff stat:
 ```
- ...dirty__d909f752-01db-4d3c-bbef-fbecc9d2a391.log | 51 ++++++++++++++++++++++
- Resolve-AI.API/.anchor/session-state.md            | 22 +---------
- 2 files changed, 53 insertions(+), 20 deletions(-)
+ ...dirty__d909f752-01db-4d3c-bbef-fbecc9d2a391.log | 16 ++++++++++++++++
+ Resolve-AI.API/.anchor/session-state.md            | 22 +---------------------
+ 2 files changed, 17 insertions(+), 21 deletions(-)
 ```
 
 ## Recent commits
 ```
+90bea32 Update forgot-password and set-password pages to match login page styling exactly
+0c681d1 Remove password reset headings and center brand logo on forgot-password and set-password pages
+e85ab48 Add brand name and tagline to forgot-password and set-password pages - match login design
+51f7dee Remove logo from forgot-password and set-password pages
+c176b2a Update floating AI dot: single centered dot on top of AI text with smooth animation
+ec26f28 Add floating AI dot effect on top of AI text - animated float animation with glow
 dabc9b2 Apply consistent border styling to forgot-password and set-password forms
 fa92ae4 Update login box: add consistent border style matching dashboard sections
-07cc239 Update chat: show use cases inline in chat messages instead of separate container
-c147296 Add use case selection feature to chat: 11 issue types with ticket creation
-39fa15d Add Support Channel field to HelpDesk ticket form
-6e3aee8 Update helpdesk dashboard section titles: consistent 22px font size and #1F487E color
-86a5cd0 Update Live Chat heading: remove icon and match section title styling
-f9eeca1 Remove hover effect from logo in all dashboards
 ```
 
 ## Resume
