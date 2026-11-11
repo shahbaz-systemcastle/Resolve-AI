@@ -10,7 +10,7 @@
         .header { background: white; border-bottom: 1px solid #e0e0e0; padding: 20px 28px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
         .header-title { font-size: 20px; font-weight: 800; color: #1F487E; }
         .logout-btn { background: #1e40af; color: white; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; }
-        .main-content { max-width: 1400px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 16px; flex: 1; padding: 40px 28px; overflow: hidden; }
+        .main-content { max-width: 1400px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 16px; flex: 1; padding: 40px 28px; overflow-y: auto; overflow-x: hidden; }
         .top-section { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-bottom: 32px; flex: 0 0 auto; min-height: 400px; }
         .chat-right { background: white; border: 2px solid #829CBC; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; height: 100%; box-shadow: 0 2px 8px rgba(31, 72, 126, 0.1); }
         .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 40px; }
@@ -22,10 +22,9 @@
         .section { background: #f0f4fa; border: 2px solid #829CBC; border-radius: 12px; padding: 32px; margin-bottom: 32px; box-shadow: 0 2px 8px rgba(31, 72, 126, 0.1); transition: transform 0.3s ease, box-shadow 0.3s ease; }
         .section:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(31, 72, 126, 0.15); }
         .top-section .section { background: white; padding: 24px; margin-bottom: 0; display: flex; flex-direction: column; overflow: hidden; height: 100%; }
-        .top-section .section-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; color: #1D3461; flex-shrink: 0; }
-        .launch-btn { background: #1F487E; color: white; border: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; cursor: pointer; margin-bottom: 24px; flex-shrink: 0; }
-        .top-section .launch-btn { margin-bottom: 16px; padding: 12px 24px; }
-        .top-section .tickets-grid { display: grid; grid-template-columns: 1fr; gap: 16px; overflow-y: auto; overflow-x: hidden; flex: 1; min-height: 0; overscroll-behavior-y: contain; }
+        .section-title { font-size: 20px; font-weight: 700; margin-bottom: 24px; color: #1D3461; }
+        .launch-btn { background: #1F487E; color: white; border: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; cursor: pointer; margin-bottom: 24px; }
+        .top-section .tickets-grid { display: grid; grid-template-columns: 1fr; gap: 16px; overflow-y: auto; flex: 1; }
         .tickets-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
         .ticket-card { background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 12px; padding: 24px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); }
         .ticket-card:hover { transform: translateY(-4px); box-shadow: 0 8px 16px rgba(31, 72, 126, 0.15); border-color: #829CBC; }
