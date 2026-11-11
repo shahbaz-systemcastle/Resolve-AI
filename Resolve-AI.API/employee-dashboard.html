@@ -15,15 +15,18 @@
         .chat-right { background: white; border: 1px solid #e0e0e0; border-radius: 12px; display: none; flex-direction: column; overflow: hidden; width: 100%; height: 350px; }
         .chat-right.active { display: flex; }
         .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 40px; }
-        .stat-card { background: #f0f4fa; border: 2px solid #829CBC; border-radius: 12px; padding: 24px; text-align: center; box-shadow: 0 2px 8px rgba(31, 72, 126, 0.1); }
+        .stat-card { background: #f0f4fa; border: 2px solid #829CBC; border-radius: 12px; padding: 28px; text-align: center; box-shadow: 0 2px 8px rgba(31, 72, 126, 0.1); transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .stat-card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(31, 72, 126, 0.2); }
         .stat-icon { font-size: 32px; margin-bottom: 12px; }
         .stat-label { color: #666666; font-size: 12px; margin-bottom: 8px; }
         .stat-value { font-size: 28px; font-weight: 700; color: #1F487E; }
-        .section { background: #f0f4fa; border: 2px solid #829CBC; border-radius: 12px; padding: 32px; margin-bottom: 32px; box-shadow: 0 2px 8px rgba(31, 72, 126, 0.1); }
+        .section { background: #f0f4fa; border: 2px solid #829CBC; border-radius: 12px; padding: 32px; margin-bottom: 32px; box-shadow: 0 2px 8px rgba(31, 72, 126, 0.1); transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .section:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(31, 72, 126, 0.15); }
         .section-title { font-size: 20px; font-weight: 700; margin-bottom: 24px; color: #1D3461; }
         .launch-btn { background: #1F487E; color: white; border: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; cursor: pointer; margin-bottom: 24px; }
         .tickets-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
-        .ticket-card { background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 12px; padding: 20px; cursor: pointer; }
+        .ticket-card { background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 12px; padding: 24px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); }
+        .ticket-card:hover { transform: translateY(-4px); box-shadow: 0 8px 16px rgba(31, 72, 126, 0.15); border-color: #829CBC; }
         .ticket-header { display: flex; justify-content: space-between; margin-bottom: 12px; }
         .ticket-id { color: #1F487E; font-weight: 600; font-size: 12px; }
         .ticket-status { padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; }
