@@ -160,13 +160,43 @@
 
         .brand-name {
             transition: all 0.3s ease;
+            position: relative;
+            display: inline-block;
+        }
+
+        .ai-text {
+            position: relative;
+            display: inline-block;
+        }
+
+        .ai-dot {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #ffc107;
+            border-radius: 50%;
+            top: -12px;
+            right: -8px;
+            animation: float-up 3s ease-in-out infinite;
+            box-shadow: 0 0 8px rgba(255, 193, 7, 0.6);
+        }
+
+        @keyframes float-up {
+            0%, 100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            50% {
+                transform: translateY(-10px);
+                opacity: 0.8;
+            }
         }
 
     </style>
 </head>
 <body>
     <div class="login-box">
-        <div class="brand-name">AutoResolve-<span style="color: #ffc107;">AI</span></div>
+        <div class="brand-name">AutoResolve-<span class="ai-text" style="color: #ffc107;">AI<div class="ai-dot"></div></span></div>
         <div class="tagline">IT Support Automation Platform</div>
 
         <div class="form-group">

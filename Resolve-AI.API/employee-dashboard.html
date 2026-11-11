@@ -45,11 +45,40 @@
         .chat-input { padding: 12px; border-top: 1px solid #829CBC; display: flex; gap: 12px; flex-shrink: 0; }
         .chat-input input { flex: 1; padding: 10px; background: white; border: 1px solid #829CBC; border-radius: 6px; color: #1a1a1a; font-size: 13px; }
         .chat-input button { background: #1F487E; color: white; border: none; padding: 10px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 12px; }
+        .header-title {
+            position: relative;
+            display: inline-block;
+        }
+        .ai-text {
+            position: relative;
+            display: inline-block;
+        }
+        .ai-dot {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #ffc107;
+            border-radius: 50%;
+            top: -12px;
+            right: -8px;
+            animation: float-up 3s ease-in-out infinite;
+            box-shadow: 0 0 8px rgba(255, 193, 7, 0.6);
+        }
+        @keyframes float-up {
+            0%, 100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            50% {
+                transform: translateY(-10px);
+                opacity: 0.8;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="header">
-        <div class="header-title">AutoResolve-<span style="color: #ffc107;">AI</span></div>
+        <div class="header-title">AutoResolve-<span class="ai-text" style="color: #ffc107;">AI<div class="ai-dot"></div></span></div>
         <div style="display: flex; gap: 16px; align-items: center;">
             <span>👤 john.smith@company.com</span>
             <button class="logout-btn" onclick="alert('Logged out! Go to: login.html')">Logout</button>

@@ -27,11 +27,40 @@
         .status-success { background: #d4edda; color: #155724; }
         .status-warning { background: #fff3cd; color: #856404; }
         .status-info { background: #d1ecf1; color: #0c5460; }
+        .header-title {
+            position: relative;
+            display: inline-block;
+        }
+        .ai-text {
+            position: relative;
+            display: inline-block;
+        }
+        .ai-dot {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #ffc107;
+            border-radius: 50%;
+            top: -12px;
+            right: -8px;
+            animation: float-up 3s ease-in-out infinite;
+            box-shadow: 0 0 8px rgba(255, 193, 7, 0.6);
+        }
+        @keyframes float-up {
+            0%, 100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            50% {
+                transform: translateY(-10px);
+                opacity: 0.8;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="header">
-        <div class="header-title">AutoResolve-<span style="color: #ffc107;">AI</span></div>
+        <div class="header-title">AutoResolve-<span class="ai-text" style="color: #ffc107;">AI<div class="ai-dot"></div></span></div>
          <div style="display: flex; gap: 16px; align-items: center;">
             <span style="background: rgba(104, 211, 145, 0.1); padding: 6px 12px; border-radius: 6px; font-size: 12px; color: #68d391;">● System Online</span>
             <span>admin@company.com</span>
