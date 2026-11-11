@@ -16,7 +16,7 @@
         .main-content::-webkit-scrollbar-thumb { background: #829CBC; border-radius: 4px; }
         .main-content::-webkit-scrollbar-thumb:hover { background: #1F487E; }
         .two-column-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-bottom: 32px; }
-        .two-column-layout .section { height: 600px; display: flex; flex-direction: column; overflow: hidden; padding: 0; }
+        .two-column-layout .section { height: 700px; display: flex; flex-direction: column; overflow: hidden; padding: 0; }
         .two-column-layout .section-title { padding: 32px 32px 0 32px; flex-shrink: 0; background: #f0f4fa; }
         .two-column-layout .section:first-child > div:nth-child(n+2) { flex: 1; overflow-y: hidden; overflow-x: hidden; padding: 24px 32px; }
         .two-column-layout .section:last-child > div:nth-child(n+2) { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 24px 32px; }
@@ -32,10 +32,10 @@
         .stat-value { font-size: 32px; font-weight: 700; color: #1F487E; }
         .section { background: #f0f4fa; border: 2px solid #829CBC; border-radius: 12px; padding: 32px; margin-bottom: 32px; box-shadow: 0 2px 8px rgba(31, 72, 126, 0.1); }
         .section-title { font-size: 22px; font-weight: 700; margin-bottom: 28px; color: #1F487E; }
-        .activity-item { background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; margin-bottom: 12px; border-left: 4px solid #1F487E; overflow: visible; }
-        .activity-time { color: #999999; font-size: 11px; text-transform: uppercase; margin-bottom: 6px; }
-        .activity-title { font-weight: 600; font-size: 14px; margin-bottom: 8px; color: #1a1a1a; }
-        .activity-desc { color: #555555; font-size: 13px; margin-bottom: 8px; }
+        .activity-item { background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; margin-bottom: 12px; border-left: 4px solid #1F487E; overflow: hidden; word-wrap: break-word; overflow-wrap: break-word; }
+        .activity-time { color: #999999; font-size: 11px; text-transform: uppercase; margin-bottom: 6px; word-wrap: break-word; }
+        .activity-title { font-weight: 600; font-size: 14px; margin-bottom: 8px; color: #1a1a1a; word-wrap: break-word; }
+        .activity-desc { color: #555555; font-size: 13px; margin-bottom: 8px; word-wrap: break-word; }
         .activity-meta { display: flex; gap: 16px; font-size: 11px; color: #999999; }
         .status-badge { display: inline-block; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; }
         .status-success { background: #d4edda; color: #155724; }
