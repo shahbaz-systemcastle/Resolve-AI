@@ -68,10 +68,6 @@
                         <strong>Support:</strong> How can I assist you today?
                     </div>
                 </div>
-                <div id="useCasesContainer" style="padding: 16px; overflow-y: auto; display: none; flex: 1; border-top: 1px solid #829CBC;">
-                    <div style="font-size: 12px; color: #666666; margin-bottom: 12px; font-weight: 600;">Select an issue type:</div>
-                    <div id="useCasesButtons" style="display: flex; flex-direction: column; gap: 8px;"></div>
-                </div>
                 <div class="chat-input">
                     <input type="text" id="chatInput" placeholder="Type message..." />
                     <button onclick="sendChatMessage()">Send</button>
@@ -216,25 +212,44 @@
         }
 
         function showUseCases() {
-            const container = document.getElementById('useCasesContainer');
-            const buttonsDiv = document.getElementById('useCasesButtons');
+            const messagesDiv = document.getElementById('chatMessages');
 
-            buttonsDiv.innerHTML = '';
+            // Add agent message
+            const agentMsg = document.createElement('div');
+            agentMsg.className = 'message agent';
+            agentMsg.style.background = '#1F487E';
+            agentMsg.style.color = 'white';
+            agentMsg.innerHTML = '<strong>Support:</strong> Please select an issue type:';
+            messagesDiv.appendChild(agentMsg);
+
+            // Add use case buttons
             useCases.forEach((useCase, index) => {
                 const btn = document.createElement('button');
-                btn.style.cssText = 'background: #1F487E; color: white; border: none; padding: 10px 12px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 12px; text-align: left;';
+                btn.style.cssText = 'background: #1F487E; color: white; border: none; padding: 10px 12px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 12px; text-align: left; margin: 4px 0;';
                 btn.textContent = useCase;
                 btn.onclick = () => selectUseCase(useCase, index + 1);
-                buttonsDiv.appendChild(btn);
+                messagesDiv.appendChild(btn);
             });
 
-            container.style.display = 'flex';
-            container.style.flexDirection = 'column';
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
 
         function selectUseCase(useCase, ticketNum) {
-            document.getElementById('useCasesContainer').style.display = 'none';
-            alert('✅ Ticket TIK-' + String(ticketNum).padStart(3, '0') + ' created for: ' + useCase);
+            const messagesDiv = document.getElementById('chatMessages');
+            const selectedMsg = document.createElement('div');
+            selectedMsg.className = 'message customer';
+            selectedMsg.textContent = useCase;
+            messagesDiv.appendChild(selectedMsg);
+
+            setTimeout(() => {
+                const confirmMsg = document.createElement('div');
+                confirmMsg.className = 'message agent';
+                confirmMsg.style.background = '#1F487E';
+                confirmMsg.style.color = 'white';
+                confirmMsg.innerHTML = '<strong>Support:</strong> Your ticket TIK-' + String(ticketNum).padStart(3, '0') + ' is created!';
+                messagesDiv.appendChild(confirmMsg);
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            }, 500);
         }
 
         function toggleChat(state) {
