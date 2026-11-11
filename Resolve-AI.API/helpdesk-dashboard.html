@@ -94,25 +94,9 @@
     <div class="main-content" id="mainContent">
         <h2 style="margin-bottom: 32px; color: #1F487E; font-size: 24px; font-weight: 700;">HelpDesk Agent Dashboard</h2>
 
-        <div class="dashboard-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-bottom: 32px; height: 320px;">
-            <div class="chat-right" style="display: flex;">
-                <div style="text-align: center; padding: 12px; border-bottom: 1px solid #2d3748; background: white; border-radius: 12px 12px 0 0;">
-                    <h3 style="font-size: 22px; font-weight: 700; margin-bottom: 2px; color: #1F487E;">Live Chat</h3>
-                    <p style="color: #a0aec0; font-size: 11px;">Support conversations</p>
-                </div>
-                <div class="chat-messages" id="chatMessages">
-                    <div class="message agent" style="background: #1F487E; color: white;">
-                        <strong>Support:</strong> How can I assist you today?
-                    </div>
-                </div>
-                <div class="chat-input">
-                    <input type="text" id="chatInput" placeholder="Type message..." />
-                    <button onclick="sendChatMessage()">Send</button>
-                </div>
-            </div>
-
-            <div class="section" style="background: white; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column;">
-                <div class="section-title">Create Ticket for Employee</div>
+        <div class="dashboard-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-bottom: 32px; height: 600px;">
+            <div class="section" style="background: white; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; padding: 32px;">
+                <div class="section-title">✏️ Create Ticket for Employee</div>
                 <div class="form-group">
                     <label class="form-label">Employee Name</label>
                     <input type="text" class="form-control" placeholder="John Smith" />
@@ -146,6 +130,37 @@
                     <textarea class="form-control" placeholder="Describe the issue..."></textarea>
                 </div>
                 <button class="btn" onclick="alert('✅ Ticket created successfully!')">Create Ticket</button>
+            </div>
+
+            <div class="section" style="background: white; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; padding: 32px;">
+                <div class="section-title">📋 Request History</div>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <div style="background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px; border-left: 4px solid #1F487E;">
+                        <div style="font-weight: 600; color: #1F487E; margin-bottom: 4px;">TIK-1024 - Password Reset</div>
+                        <div style="font-size: 12px; color: #666666; margin-bottom: 4px;">Sarah Johnson - sarah.johnson@company.com</div>
+                        <div style="font-size: 11px; color: #999999;">✅ Resolved - 2 hours ago</div>
+                    </div>
+                    <div style="background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px; border-left: 4px solid #1F487E;">
+                        <div style="font-weight: 600; color: #1F487E; margin-bottom: 4px;">TIK-1023 - License Assignment</div>
+                        <div style="font-size: 12px; color: #666666; margin-bottom: 4px;">Mike Smith - mike.smith@company.com</div>
+                        <div style="font-size: 11px; color: #999999;">✅ Resolved - 5 hours ago</div>
+                    </div>
+                    <div style="background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px; border-left: 4px solid #1F487E;">
+                        <div style="font-weight: 600; color: #1F487E; margin-bottom: 4px;">TIK-1022 - Mailbox Setup</div>
+                        <div style="font-size: 12px; color: #666666; margin-bottom: 4px;">Alice Williams - alice.williams@company.com</div>
+                        <div style="font-size: 11px; color: #999999;">✅ Resolved - 1 day ago</div>
+                    </div>
+                    <div style="background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px; border-left: 4px solid #1F487E;">
+                        <div style="font-weight: 600; color: #1F487E; margin-bottom: 4px;">TIK-1021 - Device Binding</div>
+                        <div style="font-size: 12px; color: #666666; margin-bottom: 4px;">John Davis - john.davis@company.com</div>
+                        <div style="font-size: 11px; color: #999999;">🔄 In Progress - 3 hours ago</div>
+                    </div>
+                    <div style="background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px; border-left: 4px solid #1F487E;">
+                        <div style="font-weight: 600; color: #1F487E; margin-bottom: 4px;">TIK-1020 - Password Reset</div>
+                        <div style="font-size: 12px; color: #666666; margin-bottom: 4px;">Emma Brown - emma.brown@company.com</div>
+                        <div style="font-size: 11px; color: #999999;">✅ Resolved - 2 days ago</div>
+                    </div>
+                </div>
             </div>
         </div>
 
