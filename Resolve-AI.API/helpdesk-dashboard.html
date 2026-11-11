@@ -68,6 +68,10 @@
                         <strong>Support:</strong> How can I assist you today?
                     </div>
                 </div>
+                <div id="useCasesContainer" style="padding: 16px; overflow-y: auto; display: none; flex: 1; border-top: 1px solid #829CBC;">
+                    <div style="font-size: 12px; color: #666666; margin-bottom: 12px; font-weight: 600;">Select an issue type:</div>
+                    <div id="useCasesButtons" style="display: flex; flex-direction: column; gap: 8px;"></div>
+                </div>
                 <div class="chat-input">
                     <input type="text" id="chatInput" placeholder="Type message..." />
                     <button onclick="sendChatMessage()">Send</button>
@@ -176,6 +180,20 @@
     </div>
 
     <script>
+        const useCases = [
+            '🔐 Password Expired',
+            '🔑 Forgotten Password',
+            '🖥️ Incorrect Hostname',
+            '💻 Duplicate Computer Account on AD Rejoin',
+            '🚫 Disabled User Account',
+            '📱 MFA Reset After Mobile / Phone Change',
+            '📊 Microsoft 365 License Not Assigned',
+            '📬 Mailbox Capacity Threshold Alert',
+            '🔒 MFA Not Configured',
+            '🔗 Hostname Not Bound to AD User',
+            '🔐 Account Lockout'
+        ];
+
         function sendChatMessage() {
             const input = document.getElementById('chatInput');
             const message = input.value.trim();
@@ -191,16 +209,32 @@
             input.value = '';
 
             setTimeout(() => {
-                const agentMsg = document.createElement('div');
-                agentMsg.className = 'message agent';
-                agentMsg.style.background = '#1F487E';
-                agentMsg.style.color = 'white';
-                agentMsg.innerHTML = '<strong>Support:</strong> I will help you with that!';
-                messagesDiv.appendChild(agentMsg);
-                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                showUseCases();
             }, 1000);
 
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function showUseCases() {
+            const container = document.getElementById('useCasesContainer');
+            const buttonsDiv = document.getElementById('useCasesButtons');
+
+            buttonsDiv.innerHTML = '';
+            useCases.forEach((useCase, index) => {
+                const btn = document.createElement('button');
+                btn.style.cssText = 'background: #1F487E; color: white; border: none; padding: 10px 12px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 12px; text-align: left;';
+                btn.textContent = useCase;
+                btn.onclick = () => selectUseCase(useCase, index + 1);
+                buttonsDiv.appendChild(btn);
+            });
+
+            container.style.display = 'flex';
+            container.style.flexDirection = 'column';
+        }
+
+        function selectUseCase(useCase, ticketNum) {
+            document.getElementById('useCasesContainer').style.display = 'none';
+            alert('✅ Ticket TIK-' + String(ticketNum).padStart(3, '0') + ' created for: ' + useCase);
         }
 
         function toggleChat(state) {
