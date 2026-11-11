@@ -24,6 +24,10 @@
         .two-column-layout .section:last-child > div:nth-child(n+2)::-webkit-scrollbar-track { background: #e8eef5; border-radius: 6px; }
         .two-column-layout .section:last-child > div:nth-child(n+2)::-webkit-scrollbar-thumb { background: #1F487E; border-radius: 6px; min-height: 40px; }
         .two-column-layout .section:last-child > div:nth-child(n+2)::-webkit-scrollbar-thumb:hover { background: #0d2545; }
+        .section[style*="overflow-y: auto"]::-webkit-scrollbar { width: 12px; }
+        .section[style*="overflow-y: auto"]::-webkit-scrollbar-track { background: #e8eef5; border-radius: 6px; }
+        .section[style*="overflow-y: auto"]::-webkit-scrollbar-thumb { background: #1F487E; border-radius: 6px; min-height: 40px; }
+        .section[style*="overflow-y: auto"]::-webkit-scrollbar-thumb:hover { background: #0d2545; }
         .two-column-layout .activity-item { overflow: hidden !important; max-width: 100%; display: block; white-space: normal; }
         .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 40px; }
         .stat-card { background: #f0f4fa; border: 2px solid #829CBC; border-radius: 12px; padding: 28px; text-align: center; box-shadow: 0 2px 8px rgba(31, 72, 126, 0.1); }
@@ -209,37 +213,38 @@
             </div>
             </div>
 
-            <div class="section">
+            <div class="section" style="background: white; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; padding: 32px;">
                 <div class="section-title">📋 Recent Activities</div>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <div style="background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px; border-left: 4px solid #1F487E;">
+                        <div style="font-weight: 600; color: #1F487E; margin-bottom: 4px;">TIK-1001 - M365 License Assignment</div>
+                        <div style="font-size: 12px; color: #666666; margin-bottom: 4px;">John Smith - john.smith@company.com</div>
+                        <div style="font-size: 11px; color: #999999;">✅ Resolved - 2 minutes ago</div>
+                    </div>
 
-            <div style="background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px; border-left: 4px solid #1F487E;">
-                <div style="font-weight: 600; color: #1F487E; margin-bottom: 4px;">TIK-1001 - M365 License Assignment</div>
-                <div style="font-size: 12px; color: #666666; margin-bottom: 4px;">John Smith - john.smith@company.com</div>
-                <div style="font-size: 11px; color: #999999;">✅ Resolved - 2 minutes ago</div>
-            </div>
+                    <div style="background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px; border-left: 4px solid #1F487E;">
+                        <div style="font-weight: 600; color: #1F487E; margin-bottom: 4px;">TIK-1002 - New Employee Onboarding</div>
+                        <div style="font-size: 12px; color: #666666; margin-bottom: 4px;">Sarah Johnson - sarah.johnson@company.com</div>
+                        <div style="font-size: 11px; color: #999999;">✅ Resolved - 5 minutes ago</div>
+                    </div>
 
-            <div style="background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px; border-left: 4px solid #1F487E;">
-                <div style="font-weight: 600; color: #1F487E; margin-bottom: 4px;">TIK-1002 - New Employee Onboarding</div>
-                <div style="font-size: 12px; color: #666666; margin-bottom: 4px;">Sarah Johnson - sarah.johnson@company.com</div>
-                <div style="font-size: 11px; color: #999999;">✅ Resolved - 5 minutes ago</div>
-            </div>
+                    <div style="background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px; border-left: 4px solid #1F487E;">
+                        <div style="font-weight: 600; color: #1F487E; margin-bottom: 4px;">TIK-1003 - Password Reset</div>
+                        <div style="font-size: 12px; color: #666666; margin-bottom: 4px;">Mike Johnson - mike.johnson@company.com</div>
+                        <div style="font-size: 11px; color: #999999;">✅ Resolved - 12 minutes ago</div>
+                    </div>
 
-            <div style="background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px; border-left: 4px solid #1F487E;">
-                <div style="font-weight: 600; color: #1F487E; margin-bottom: 4px;">TIK-1003 - Password Reset</div>
-                <div style="font-size: 12px; color: #666666; margin-bottom: 4px;">Mike Johnson - mike.johnson@company.com</div>
-                <div style="font-size: 11px; color: #999999;">✅ Resolved - 12 minutes ago</div>
-            </div>
+                    <div style="background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px; border-left: 4px solid #1F487E;">
+                        <div style="font-weight: 600; color: #1F487E; margin-bottom: 4px;">TIK-1004 - Mailbox Setup</div>
+                        <div style="font-size: 12px; color: #666666; margin-bottom: 4px;">Alice Williams - alice.williams@company.com</div>
+                        <div style="font-size: 11px; color: #999999;">🔄 In Progress - 18 minutes ago</div>
+                    </div>
 
-            <div style="background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px; border-left: 4px solid #1F487E;">
-                <div style="font-weight: 600; color: #1F487E; margin-bottom: 4px;">TIK-1004 - Mailbox Setup</div>
-                <div style="font-size: 12px; color: #666666; margin-bottom: 4px;">Alice Williams - alice.williams@company.com</div>
-                <div style="font-size: 11px; color: #999999;">🔄 In Progress - 18 minutes ago</div>
-            </div>
-
-            <div style="background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px; border-left: 4px solid #1F487E;">
-                <div style="font-weight: 600; color: #1F487E; margin-bottom: 4px;">TIK-1005 - Device Binding</div>
-                <div style="font-size: 12px; color: #666666; margin-bottom: 4px;">John Davis - john.davis@company.com</div>
-                <div style="font-size: 11px; color: #999999;">⏳ Pending - 25 minutes ago</div>
+                    <div style="background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px; border-left: 4px solid #1F487E;">
+                        <div style="font-weight: 600; color: #1F487E; margin-bottom: 4px;">TIK-1005 - Device Binding</div>
+                        <div style="font-size: 12px; color: #666666; margin-bottom: 4px;">John Davis - john.davis@company.com</div>
+                        <div style="font-size: 11px; color: #999999;">⏳ Pending - 25 minutes ago</div>
+                    </div>
                 </div>
             </div>
         </div>
