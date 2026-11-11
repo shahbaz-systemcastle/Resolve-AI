@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoResolve-AI - OTP Verification</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #1a1a1a;
+        }
+
+        .otp-box {
+            background: white;
+            border: 2px solid #829CBC;
+            border-radius: 12px;
+            padding: 48px 40px;
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 2px 8px rgba(31, 72, 126, 0.1);
+        }
+
+        .brand-name {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            color: #1F487E;
+        }
+
+        .ai-text {
+            position: relative;
+            display: inline-block;
+        }
+
+        .ai-dot {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #ffc107;
+            border-radius: 50%;
+            top: -12px;
+            animation: float-up 3s ease-in-out infinite;
+            box-shadow: 0 0 8px rgba(255, 193, 7, 0.6);
+        }
+
+        @keyframes float-up {
+            0%, 100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            50% {
+                transform: translateY(-10px);
+                opacity: 0.8;
+            }
+        }
+
+        .title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #1F487E;
+        }
+
+        .tagline {
+            color: #666666;
+            margin-bottom: 32px;
+            font-size: 13px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #1a1a1a;
+            text-align: left;
+        }
+
+        .otp-input {
+            width: 100%;
+            padding: 16px 16px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            color: #1a1a1a;
+            font-size: 18px;
+            letter-spacing: 4px;
+            text-align: center;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .otp-input:focus {
+            outline: none;
+            border-color: #1F487E;
+            box-shadow: 0 0 0 3px rgba(31, 72, 126, 0.1);
+        }
+
+        .otp-input::placeholder {
+            letter-spacing: 4px;
+        }
+
+        .timer {
+            font-size: 12px;
+            color: #666666;
+            margin-top: 12px;
+        }
+
+        .timer.warning {
+            color: #dc3545;
+            font-weight: 600;
+        }
+
+        .btn {
+            padding: 14px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: #1F487E;
+            color: white;
+            border: 1px solid transparent;
+            margin-bottom: 12px;
+        }
+
+        .btn-primary:hover {
+            background: white;
+            color: #1F487E;
+            border: 1px solid #1F487E;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #1F487E;
+            border: 1px solid #1F487E;
+        }
+
+        .btn-secondary:hover {
+            background: #1F487E;
+            color: white;
+            border: 1px solid #1F487E;
+        }
+
+        .btn-secondary:disabled {
+            background: #f0f4fa;
+            color: #829CBC;
+            border: 1px solid #e0e0e0;
+            cursor: not-allowed;
+        }
+
+        .resend-link {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #666666;
+        }
+
+        .resend-link a {
+            color: #1F487E;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .resend-link a:hover {
+            text-decoration: underline;
+            color: #1D3461;
+        }
+
+        .info-message {
+            background: #d1ecf1;
+            color: #0c5460;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            margin-bottom: 24px;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="otp-box">
+        <div class="brand-name">AutoResolve <span class="ai-text" style="color: #ffc107;">AI<div class="ai-dot" style="left: 50%; transform: translateX(-50%);"></div></span></div>
+        <div class="title">OTP Verification</div>
+        <div class="tagline">Enter the 6-digit code sent to your registered email</div>
+
+        <div class="info-message">
+            📧 OTP sent to john.smith@company.com
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">One-Time Password</label>
+            <input type="text" class="otp-input" id="otpInput" placeholder="000000" maxlength="6" inputmode="numeric" />
+            <div class="timer" id="timerDisplay">Time remaining: 2:00</div>
+        </div>
+
+        <button class="btn btn-primary" onclick="verifyOTP()">Verify OTP</button>
+        <button class="btn btn-secondary" id="resendBtn" onclick="resendOTP()">Resend Code</button>
+
+        <div class="resend-link">
+            Didn't receive? <a onclick="changeEmail()">Change email address</a>
+        </div>
+    </div>
+
+    <script>
+        let timeRemaining = 120; // 2 minutes
+
+        function startTimer() {
+            const timerInterval = setInterval(() => {
+                timeRemaining--;
+                const minutes = Math.floor(timeRemaining / 60);
+                const seconds = timeRemaining % 60;
+                const timerDisplay = document.getElementById('timerDisplay');
+                const resendBtn = document.getElementById('resendBtn');
+
+                timerDisplay.textContent = `Time remaining: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+                if (timeRemaining <= 30) {
+                    timerDisplay.classList.add('warning');
+                }
+
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    timerDisplay.textContent = 'OTP expired. Please request a new one.';
+                    resendBtn.disabled = false;
+                    document.getElementById('otpInput').disabled = true;
+                }
+            }, 1000);
+        }
+
+        function verifyOTP() {
+            const otp = document.getElementById('otpInput').value;
+
+            if (!otp || otp.length !== 6) {
+                alert('⚠️ Please enter a valid 6-digit OTP');
+                return;
+            }
+
+            if (!/^\d+$/.test(otp)) {
+                alert('⚠️ OTP must contain only numbers');
+                return;
+            }
+
+            alert(`✅ OTP verified successfully!\n\nOTP: ${otp}\n\nYou will be redirected to the dashboard.`);
+            // window.location.href = 'admin-dashboard.html';
+        }
+
+        function resendOTP() {
+            timeRemaining = 120;
+            document.getElementById('timerDisplay').classList.remove('warning');
+            document.getElementById('otpInput').value = '';
+            document.getElementById('otpInput').disabled = false;
+            document.getElementById('resendBtn').disabled = true;
+            alert('✅ OTP has been resent to john.smith@company.com');
+            startTimer();
+        }
+
+        function changeEmail() {
+            alert('📧 You will be redirected to login page to change email address.');
+            // window.location.href = 'login.html';
+        }
+
+        // Format OTP input to only accept numbers
+        document.getElementById('otpInput').addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+
+        // Start timer on page load
+        window.addEventListener('load', function() {
+            startTimer();
+        });
+    </script>
+</body>
+</html>
