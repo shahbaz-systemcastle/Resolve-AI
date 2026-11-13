@@ -111,57 +111,93 @@
             grid-template-columns: repeat(4, 1fr);
             gap: 16px;
         }
-        @media (max-width: 1280px) {
-            .channel-grid { grid-template-columns: repeat(2, 1fr); }
-        }
-        @media (max-width: 768px) {
-            .channel-grid { grid-template-columns: 1fr; }
-        }
-        @media (max-width: 1280px) {
-            .main-content { padding: 24px 20px; }
-            .dashboard-grid { gap: 24px; height: auto; grid-template-columns: 1fr; }
-            .section { padding: 24px; }
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
-        }
-        @media (max-width: 768px) {
-            .header { padding: 16px 16px; flex-direction: column; gap: 12px; }
-            .header-title { font-size: 18px; }
-            .main-content { padding: 16px; }
-            .dashboard-grid { gap: 16px; }
-            .section { padding: 16px; margin-bottom: 16px; }
-            .section-title { font-size: 18px; margin-bottom: 16px; }
-            .stats-grid { grid-template-columns: 1fr; gap: 12px; margin-bottom: 24px; }
-            .stat-card { padding: 16px; }
+        /* ===== TABLET VIEW (768px - 1023px) ===== */
+        @media (max-width: 1023px) {
+            .header { padding: 18px 16px; }
+            .header-title { font-size: 19px; }
+            .main-content { padding: 28px 18px; max-width: 100%; }
+            .dashboard-grid { gap: 20px; height: auto; grid-template-columns: 1fr; }
+            .section { padding: 22px; margin-bottom: 20px; }
+            .section-title { font-size: 20px; margin-bottom: 20px; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 28px; }
+            .stat-card { padding: 18px; }
+            .stat-icon { font-size: 28px; }
             .stat-value { font-size: 24px; }
-            h2 { font-size: 20px; margin-bottom: 16px; }
+            .stat-label { font-size: 11px; }
+            .channel-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
             .channel-card { padding: 16px; }
-            .metric-item { padding: 0 8px; }
-            .channel-card:hover { box-shadow: 0 2px 8px rgba(31, 72, 126, 0.1); }
+            h2 { font-size: 21px; margin-bottom: 18px; }
+            .form-control { padding: 10px 12px; font-size: 14px; }
+            .btn { padding: 11px 18px; font-size: 13px; }
         }
-        @media (max-width: 480px) {
-            .header { padding: 12px; }
-            .header-title { font-size: 16px; }
-            .main-content { padding: 12px; }
-            .section { padding: 12px; margin-bottom: 12px; }
-            .section-title { font-size: 16px; margin-bottom: 12px; }
-            .dashboard-grid { gap: 12px; }
-            .stats-grid { grid-template-columns: 1fr; gap: 8px; margin-bottom: 16px; }
-            .stat-card { padding: 12px; }
-            .stat-icon { font-size: 24px; }
-            .stat-label { font-size: 10px; }
+
+        /* ===== MOBILE VIEW (up to 767px) ===== */
+        @media (max-width: 767px) {
+            .header { padding: 14px 12px; flex-direction: column; gap: 10px; }
+            .header-title { font-size: 17px; }
+            .logout-btn { padding: 8px 12px; font-size: 12px; }
+            .main-content { padding: 18px 12px; max-width: 100%; }
+
+            /* Dashboard Grid */
+            .dashboard-grid { gap: 14px; height: auto; grid-template-columns: 1fr; }
+            .section { padding: 16px; margin-bottom: 16px; }
+            .section-title { font-size: 17px; margin-bottom: 14px; }
+
+            /* Stats Grid */
+            .stats-grid { grid-template-columns: 1fr; gap: 11px; margin-bottom: 20px; }
+            .stat-card { padding: 14px; }
+            .stat-icon { font-size: 22px; margin-bottom: 8px; }
+            .stat-label { font-size: 10px; margin-bottom: 5px; }
             .stat-value { font-size: 20px; }
-            .form-control { padding: 10px 12px; font-size: 12px; }
-            .btn { padding: 10px 16px; font-size: 12px; }
-            h2 { font-size: 18px; margin-bottom: 12px; }
-            .channel-card { padding: 12px; margin-bottom: 8px; }
-            .channel-card > div:first-child { font-size: 12px; margin-bottom: 8px; }
+
+            /* Channel Grid */
+            .channel-grid { grid-template-columns: 1fr; gap: 11px; }
+            .channel-card { padding: 13px; margin-bottom: 0; }
+            .channel-card > div:first-child { font-size: 13px; margin-bottom: 8px; }
             .metric-item { padding: 0 6px; }
-            .metric-item div:last-child { font-size: 16px; }
-            .metric-item div:first-child { font-size: 9px; }
+            .metric-item div:first-child { font-size: 10px; }
+            .metric-item div:last-child { font-size: 15px; }
+
+            /* Form */
+            .form-control { padding: 9px 11px; font-size: 13px; }
+            .btn { padding: 9px 15px; font-size: 12px; }
+
+            /* Heading */
+            h2 { font-size: 19px; margin-bottom: 14px; }
         }
-        @media (max-width: 1024px) {
-            .main-content { max-width: 100%; }
-            .dashboard-grid { height: auto; }
+
+        /* ===== SMALL MOBILE VIEW (up to 480px) ===== */
+        @media (max-width: 480px) {
+            .header { padding: 12px 10px; }
+            .header-title { font-size: 15px; }
+            .main-content { padding: 14px 10px; }
+
+            /* Dashboard Grid */
+            .dashboard-grid { gap: 12px; }
+            .section { padding: 12px; margin-bottom: 12px; }
+            .section-title { font-size: 15px; margin-bottom: 12px; }
+
+            /* Stats Grid */
+            .stats-grid { grid-template-columns: 1fr; gap: 9px; margin-bottom: 16px; }
+            .stat-card { padding: 12px; }
+            .stat-icon { font-size: 20px; margin-bottom: 6px; }
+            .stat-label { font-size: 9px; margin-bottom: 4px; }
+            .stat-value { font-size: 18px; }
+
+            /* Channel Grid */
+            .channel-grid { grid-template-columns: 1fr; gap: 9px; }
+            .channel-card { padding: 11px; margin-bottom: 0; }
+            .channel-card > div:first-child { font-size: 11px; margin-bottom: 6px; }
+            .metric-item { padding: 0 4px; }
+            .metric-item div:first-child { font-size: 8px; }
+            .metric-item div:last-child { font-size: 13px; }
+
+            /* Form */
+            .form-control { padding: 8px 10px; font-size: 12px; }
+            .btn { padding: 8px 12px; font-size: 11px; }
+
+            /* Heading */
+            h2 { font-size: 16px; margin-bottom: 12px; }
         }
     </style>
 </head>

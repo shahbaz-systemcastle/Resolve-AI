@@ -113,23 +113,98 @@
             font-weight: 700;
             font-size: 16px;
         }
-        @media (max-width: 1280px) {
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
-            .channel-grid { grid-template-columns: repeat(2, 1fr); }
+        /* ===== TABLET VIEW (768px - 1023px) ===== */
+        @media (max-width: 1023px) {
+            .main-content { padding: 32px 20px; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 32px; }
+            .stat-card { padding: 20px; }
+            .stat-icon { font-size: 28px; }
+            .stat-value { font-size: 24px; }
+            .stat-label { font-size: 11px; }
+            .top-section { grid-template-columns: 1fr; gap: 24px; height: auto; margin-bottom: 32px; }
+            .channel-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+            .section-title { font-size: 20px; margin-bottom: 20px; }
+            .ticket-card { padding: 20px; }
         }
-        @media (max-width: 768px) {
-            .main-content { padding: 24px 16px; }
-            .stats-grid { grid-template-columns: 1fr; }
-            .top-section { grid-template-columns: 1fr; height: auto; }
-            .channel-grid { grid-template-columns: 1fr; }
-            .channel-card { padding: 16px; }
-        }
-        @media (max-width: 480px) {
-            .main-content { padding: 16px; }
-            .channel-grid { gap: 8px; }
-            .channel-card { padding: 12px; }
-            .channel-card > div:first-child { font-size: 14px; }
+
+        /* ===== MOBILE VIEW (up to 767px) ===== */
+        @media (max-width: 767px) {
+            .header { padding: 16px 16px; flex-direction: column; gap: 12px; }
+            .header-title { font-size: 18px; }
+            .logout-btn { padding: 8px 12px; font-size: 12px; }
+            .main-content { padding: 20px 12px; max-width: 100%; }
+
+            /* Stats Grid */
+            .stats-grid { grid-template-columns: 1fr; gap: 12px; margin-bottom: 24px; }
+            .stat-card { padding: 16px; }
+            .stat-icon { font-size: 24px; margin-bottom: 10px; }
+            .stat-label { font-size: 10px; margin-bottom: 6px; }
+            .stat-value { font-size: 20px; }
+
+            /* Top Section */
+            .top-section { grid-template-columns: 1fr; gap: 20px; height: auto; margin-bottom: 24px; }
+            .chat-right { min-height: 300px; }
+            .top-section .section { padding: 20px; }
+            .section-title { font-size: 18px; margin-bottom: 16px; }
+            .launch-btn { padding: 12px 24px; font-size: 14px; margin-bottom: 16px; }
+
+            /* Channel Grid */
+            .channel-grid { grid-template-columns: 1fr; gap: 12px; }
+            .channel-card { padding: 14px; }
+            .channel-stat-label { font-size: 10px; }
             .channel-stat-value { font-size: 14px; }
+
+            /* Tickets */
+            .tickets-grid { gap: 12px; }
+            .ticket-card { padding: 16px; }
+            .ticket-title { font-size: 13px; }
+            .ticket-id { font-size: 11px; }
+            .ticket-action { padding: 6px 10px; font-size: 11px; }
+
+            /* Tab Buttons */
+            .tab-buttons { gap: 8px; margin-bottom: 16px; }
+            .tab-btn { padding: 8px 16px; font-size: 12px; }
+
+            /* Chat */
+            .chat-messages { padding: 12px; gap: 10px; }
+            .section { padding: 16px; margin-bottom: 24px; }
+        }
+
+        /* ===== SMALL MOBILE VIEW (up to 480px) ===== */
+        @media (max-width: 480px) {
+            .header { padding: 12px 12px; }
+            .header-title { font-size: 16px; }
+            .main-content { padding: 16px 10px; }
+
+            /* Stats Grid */
+            .stats-grid { margin-bottom: 20px; }
+            .stat-card { padding: 14px; }
+            .stat-icon { font-size: 20px; }
+            .stat-value { font-size: 18px; }
+            .stat-label { font-size: 9px; }
+
+            /* Top Section */
+            .top-section { gap: 16px; margin-bottom: 20px; }
+            .chat-right { min-height: 250px; }
+            .top-section .section { padding: 16px; }
+            .section-title { font-size: 16px; }
+            .launch-btn { padding: 10px 20px; font-size: 13px; }
+
+            /* Channel Grid */
+            .channel-grid { gap: 10px; }
+            .channel-card { padding: 12px; }
+            .channel-stat { padding: 6px 0; }
+            .channel-stat-label { font-size: 9px; }
+            .channel-stat-value { font-size: 13px; }
+
+            /* Tickets */
+            .ticket-card { padding: 12px; }
+            .ticket-title { font-size: 12px; }
+            .ticket-id { font-size: 10px; }
+
+            /* Text */
+            .section { padding: 14px; margin-bottom: 20px; }
+            .chat-messages { padding: 10px; }
         }
     </style>
 </head>
