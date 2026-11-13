@@ -77,6 +77,58 @@
                 opacity: 0.8;
             }
         }
+        .channel-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(31, 72, 126, 0.1);
+            transition: all 0.3s ease;
+        }
+        .channel-card:hover {
+            box-shadow: 0 4px 16px rgba(31, 72, 126, 0.15);
+            border-color: #829CBC;
+        }
+        .channel-stat {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f4fa;
+        }
+        .channel-stat:last-child {
+            border-bottom: none;
+        }
+        .channel-stat-label {
+            color: #666666;
+            font-size: 12px;
+        }
+        .channel-stat-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1F487E;
+        }
+        @media (max-width: 1280px) {
+            .support-stats-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+        }
+        @media (max-width: 768px) {
+            .support-stats-grid {
+                grid-template-columns: 1fr !important;
+            }
+        }
+        @media (max-width: 480px) {
+            .channel-card {
+                padding: 16px;
+            }
+            .channel-stat-label {
+                font-size: 11px;
+            }
+            .channel-stat-value {
+                font-size: 14px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -122,96 +174,88 @@
         <div class="two-column-layout">
             <div class="section">
                 <div class="section-title">🎯 Support Channel Statistics</div>
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin-bottom: 32px;">
+            <div class="support-stats-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px;">
                 <!-- Microsoft Teams Channel -->
-                <div style="background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 12px; padding: 24px;">
-                    <div style="font-size: 22px; font-weight: 700; margin-bottom: 16px; color: #1F487E;">👥 Microsoft Teams</div>
-                    <div style="display: flex; flex-direction: column; gap: 12px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="color: #666666;">📊 Total Requests:</span>
-                            <span style="font-size: 20px; font-weight: 700; color: #1F487E;">171</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="color: #666666;">✅ Resolved:</span>
-                            <span style="font-size: 20px; font-weight: 700; color: #28a745;">156</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="color: #666666;">⏳ Pending:</span>
-                            <span style="font-size: 20px; font-weight: 700; color: #ffc107;">12</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="color: #666666;">🔴 Escalation:</span>
-                            <span style="font-size: 20px; font-weight: 700; color: #dc3545;">3</span>
-                        </div>
+                <div class="channel-card">
+                    <div style="font-size: 14px; font-weight: 600; margin-bottom: 16px; color: #1F487E;">👥 Microsoft Teams</div>
+                    <div class="channel-stat">
+                        <span class="channel-stat-label">📊 Total Requests:</span>
+                        <span class="channel-stat-value">171</span>
+                    </div>
+                    <div class="channel-stat">
+                        <span class="channel-stat-label">✅ Resolved:</span>
+                        <span class="channel-stat-value" style="color: #28a745;">156</span>
+                    </div>
+                    <div class="channel-stat">
+                        <span class="channel-stat-label">⏳ In Progress:</span>
+                        <span class="channel-stat-value" style="color: #ffc107;">12</span>
+                    </div>
+                    <div class="channel-stat">
+                        <span class="channel-stat-label">🔴 Escalation:</span>
+                        <span class="channel-stat-value" style="color: #dc3545;">3</span>
                     </div>
                 </div>
 
                 <!-- Phone Channel -->
-                <div style="background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 12px; padding: 24px;">
-                    <div style="font-size: 22px; font-weight: 700; margin-bottom: 16px; color: #1F487E;">☎️ Phone Support</div>
-                    <div style="display: flex; flex-direction: column; gap: 12px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="color: #666666;">📊 Total Requests:</span>
-                            <span style="font-size: 20px; font-weight: 700; color: #1F487E;">351</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="color: #666666;">✅ Resolved:</span>
-                            <span style="font-size: 20px; font-weight: 700; color: #28a745;">342</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="color: #666666;">⏳ Pending:</span>
-                            <span style="font-size: 20px; font-weight: 700; color: #ffc107;">8</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="color: #666666;">🔴 Escalation:</span>
-                            <span style="font-size: 20px; font-weight: 700; color: #dc3545;">1</span>
-                        </div>
+                <div class="channel-card">
+                    <div style="font-size: 14px; font-weight: 600; margin-bottom: 16px; color: #1F487E;">☎️ Phone Support</div>
+                    <div class="channel-stat">
+                        <span class="channel-stat-label">📊 Total Requests:</span>
+                        <span class="channel-stat-value">351</span>
+                    </div>
+                    <div class="channel-stat">
+                        <span class="channel-stat-label">✅ Resolved:</span>
+                        <span class="channel-stat-value" style="color: #28a745;">342</span>
+                    </div>
+                    <div class="channel-stat">
+                        <span class="channel-stat-label">⏳ In Progress:</span>
+                        <span class="channel-stat-value" style="color: #ffc107;">8</span>
+                    </div>
+                    <div class="channel-stat">
+                        <span class="channel-stat-label">🔴 Escalation:</span>
+                        <span class="channel-stat-value" style="color: #dc3545;">1</span>
                     </div>
                 </div>
 
                 <!-- Web Channel -->
-                <div style="background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 12px; padding: 24px;">
-                    <div style="font-size: 22px; font-weight: 700; margin-bottom: 16px; color: #1F487E;">🌐 Web Portal</div>
-                    <div style="display: flex; flex-direction: column; gap: 12px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="color: #666666;">📊 Total Requests:</span>
-                            <span style="font-size: 20px; font-weight: 700; color: #1F487E;">298</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="color: #666666;">✅ Resolved:</span>
-                            <span style="font-size: 20px; font-weight: 700; color: #28a745;">278</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="color: #666666;">⏳ Pending:</span>
-                            <span style="font-size: 20px; font-weight: 700; color: #ffc107;">15</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="color: #666666;">🔴 Escalation:</span>
-                            <span style="font-size: 20px; font-weight: 700; color: #dc3545;">5</span>
-                        </div>
+                <div class="channel-card">
+                    <div style="font-size: 14px; font-weight: 600; margin-bottom: 16px; color: #1F487E;">🌐 Web Portal</div>
+                    <div class="channel-stat">
+                        <span class="channel-stat-label">📊 Total Requests:</span>
+                        <span class="channel-stat-value">298</span>
+                    </div>
+                    <div class="channel-stat">
+                        <span class="channel-stat-label">✅ Resolved:</span>
+                        <span class="channel-stat-value" style="color: #28a745;">278</span>
+                    </div>
+                    <div class="channel-stat">
+                        <span class="channel-stat-label">⏳ In Progress:</span>
+                        <span class="channel-stat-value" style="color: #ffc107;">15</span>
+                    </div>
+                    <div class="channel-stat">
+                        <span class="channel-stat-label">🔴 Escalation:</span>
+                        <span class="channel-stat-value" style="color: #dc3545;">5</span>
                     </div>
                 </div>
 
                 <!-- Walk-in Channel -->
-                <div style="background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 12px; padding: 24px;">
-                    <div style="font-size: 22px; font-weight: 700; margin-bottom: 16px; color: #1F487E;">🚶 Walk-in Support</div>
-                    <div style="display: flex; flex-direction: column; gap: 12px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="color: #666666;">📊 Total Requests:</span>
-                            <span style="font-size: 20px; font-weight: 700; color: #1F487E;">96</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="color: #666666;">✅ Resolved:</span>
-                            <span style="font-size: 20px; font-weight: 700; color: #28a745;">89</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="color: #666666;">⏳ Pending:</span>
-                            <span style="font-size: 20px; font-weight: 700; color: #ffc107;">5</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="color: #666666;">🔴 Escalation:</span>
-                            <span style="font-size: 20px; font-weight: 700; color: #dc3545;">2</span>
-                        </div>
+                <div class="channel-card">
+                    <div style="font-size: 14px; font-weight: 600; margin-bottom: 16px; color: #1F487E;">🚶 Walk-in Support</div>
+                    <div class="channel-stat">
+                        <span class="channel-stat-label">📊 Total Requests:</span>
+                        <span class="channel-stat-value">96</span>
+                    </div>
+                    <div class="channel-stat">
+                        <span class="channel-stat-label">✅ Resolved:</span>
+                        <span class="channel-stat-value" style="color: #28a745;">89</span>
+                    </div>
+                    <div class="channel-stat">
+                        <span class="channel-stat-label">⏳ In Progress:</span>
+                        <span class="channel-stat-value" style="color: #ffc107;">5</span>
+                    </div>
+                    <div class="channel-stat">
+                        <span class="channel-stat-label">🔴 Escalation:</span>
+                        <span class="channel-stat-value" style="color: #dc3545;">2</span>
                     </div>
                 </div>
             </div>
@@ -247,7 +291,7 @@
                     <div style="background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px; border-left: 4px solid #1F487E;">
                         <div style="font-weight: 600; color: #1F487E; margin-bottom: 4px;">TIK-1005 - Device Binding</div>
                         <div style="font-size: 12px; color: #666666; margin-bottom: 4px;">John Davis - john.davis@company.com</div>
-                        <div style="font-size: 11px; color: #999999;">⏳ Pending - 25 minutes ago</div>
+                        <div style="font-size: 11px; color: #999999;">⏳ In Progress - 25 minutes ago</div>
                     </div>
 
                     <div style="background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px; border-left: 4px solid #1F487E;">
