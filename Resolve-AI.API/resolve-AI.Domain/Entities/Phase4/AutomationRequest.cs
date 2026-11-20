@@ -11,4 +11,8 @@ public class AutomationRequest
     public string Status { get; set; } = "Pending";
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
+
+    // Approval for the action. Defaults to false, so nothing is changed in
+    // Microsoft 365 unless approval is explicitly given on the request.
+    public bool IsApproved { get; set; } = false;
 }

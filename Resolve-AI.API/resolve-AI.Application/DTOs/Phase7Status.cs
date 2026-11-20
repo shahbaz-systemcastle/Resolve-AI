@@ -25,4 +25,18 @@ public static class Phase7Status
     // Mailbox action result codes (WBS 7.14 and 7.15), in MailboxActionResultDto.Status.
     public const string MailboxActionLoggedOnly = "LOGGED_ONLY";
     public const string MailboxActionFailed = "FAILED";
+
+    // Business-rule codes from the license assignment (WBS 7.08).
+    public const string NoFreeSeats = "NO_FREE_SEATS";
+    public const string SkuNotEnabled = "SKU_NOT_ENABLED";
+    public const string SkuNotAvailable = "SKU_NOT_AVAILABLE";
+    public const string TeamsNotAvailable = "TEAMS_NOT_AVAILABLE";
+    public const string TeamsReviewRequired = "TEAMS_REVIEW_REQUIRED";
+
+    // Enterprise Service request validation codes (request contract).
+    public const string InvalidOperationId = "INVALID_OPERATION_ID";
+    public const string UnsupportedSchemaVersion = "UNSUPPORTED_SCHEMA_VERSION";
+    public const string UnknownOperation = "UNKNOWN_OPERATION";
+    public const string InvalidParameters = "INVALID_PARAMETERS";
+    public const string TargetMismatch = "TARGET_MISMATCH";
 }

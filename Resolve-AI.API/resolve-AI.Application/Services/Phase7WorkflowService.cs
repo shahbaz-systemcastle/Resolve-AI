@@ -163,7 +163,7 @@ public class Phase7WorkflowService : IPhase7WorkflowService
                     user.UserIdentifier,
                     request.TenantIdentifier,
                     usesMock);
-                return await FinalizeResultAsync(result);
+                return await FinalizeResultAsync(request, result);
             }
 
             // 7.06 - License Status Retrieval
@@ -211,7 +211,7 @@ public class Phase7WorkflowService : IPhase7WorkflowService
                     IsMock = usesMock,
                     LicenseSnapshot = noActionSnapshot
                 };
-                return await FinalizeResultAsync(noActionResult);
+                return await FinalizeResultAsync(request, noActionResult);
             }
 
             // 7.08 - Approved License Action Execution
@@ -284,7 +284,7 @@ public class Phase7WorkflowService : IPhase7WorkflowService
                     IsMock = usesMock,
                     LicenseSnapshot = licenseSnapshot
                 };
-                return await FinalizeResultAsync(unverifiedResult);
+                return await FinalizeResultAsync(request, unverifiedResult);
             }
 
             var completedResult = new Phase7WorkflowResultDto
@@ -299,7 +299,7 @@ public class Phase7WorkflowService : IPhase7WorkflowService
                 IsMock = usesMock,
                 LicenseSnapshot = licenseSnapshot
             };
-            return await FinalizeResultAsync(completedResult);
+            return await FinalizeResultAsync(request, completedResult);
         }
         catch (Exception ex)
         {
@@ -399,6 +399,7 @@ public class Phase7WorkflowService : IPhase7WorkflowService
     // 7.17 - Orchestration Result Handoff
     // 8.12-8.18 - Phase 8 storage integration
     private async Task<Phase7WorkflowResultDto> FinalizeResultAsync(
+        Phase7WorkflowRequestDto request,
         Phase7WorkflowResultDto result)
     {
         // Phase 8 WBS 8.12-8.18: Store request and result for audit trail
@@ -407,10 +408,10 @@ public class Phase7WorkflowService : IPhase7WorkflowService
             // Save request (WBS 8.17)
             var dbRequestId = await _storageService.SaveRequestAsync(
                 requestId: result.RequestId,
-                userIdentifier: result.RequestId, // Will be updated from actual request
+                userIdentifier: request.UserIdentifier,
                 useCase: (int)result.UseCase,
-                tenantIdentifier: "default", // Will be from actual request
-                isApproved: false); // Will be from actual request
+                tenantIdentifier: request.TenantIdentifier ?? "default",
+                isApproved: request.IsApproved ?? false);
 
             // Log initial action (WBS 8.15)
             await _storageService.LogActionAsync(
@@ -437,9 +438,11 @@ public class Phase7WorkflowService : IPhase7WorkflowService
                 actionStatus: result.Success ? "success" : "failed",
                 details: $"Phase 7 workflow completed with status: {result.Status}");
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            // Don't fail the workflow if storage fails; continue
+            // The workflow result is still returned, but the failed save is
+            // stated in the message so it is not silently lost.
+            result.Message += $" Storage not saved: {ex.Message}.";
         }
 
         return await _handoffService.PrepareHandoffAsync(result);
