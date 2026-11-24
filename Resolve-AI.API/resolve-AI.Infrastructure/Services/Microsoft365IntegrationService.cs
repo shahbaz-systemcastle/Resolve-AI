@@ -3,6 +3,7 @@ using Microsoft.Graph;
 using Microsoft.Graph.Models;
 using System.Text;
 using Microsoft.Kiota.Abstractions;
+using Microsoft.Extensions.Logging;
 using resolve_AI.Application.DTOs;
 using resolve_AI.Application.Interfaces;
 
@@ -19,9 +20,12 @@ namespace resolve_AI.Infrastructure.Services;
 public class Microsoft365IntegrationService : IMicrosoft365IntegrationService
 {
     private readonly GraphServiceClient _graphClient;
+    private readonly ILogger<Microsoft365IntegrationService> _logger;
 
-    public Microsoft365IntegrationService()
+    public Microsoft365IntegrationService(
+        ILogger<Microsoft365IntegrationService> logger)
     {
+        _logger = logger;
         var tenantId = Environment.GetEnvironmentVariable("AZURE_TENANT_ID");
         var clientId = Environment.GetEnvironmentVariable("AZURE_CLIENT_ID");
         var clientSecret = Environment.GetEnvironmentVariable("AZURE_CLIENT_SECRET");
@@ -173,10 +177,30 @@ public class Microsoft365IntegrationService : IMicrosoft365IntegrationService
         string userIdentifier,
         string? tenantIdentifier)
     {
+        foreach (var period in new[] { "D7", "D30", "D90" })
+        {
+            var usage = await ReadMailboxUsageReportAsync(userIdentifier, period);
+            if (usage.Found)
+                return usage;
+        }
+
+        return new MailboxUsageDto
+        {
+            UserIdentifier = userIdentifier,
+            Found = false,
+            IsMock = false
+        };
+    }
+
+    private async Task<MailboxUsageDto> ReadMailboxUsageReportAsync(
+        string userIdentifier,
+        string period)
+    {
+        _logger.LogInformation("Mailbox usage lookup started for {UserIdentifier}; period {Period}.", userIdentifier, period);
         // Graph usage report. It is refreshed with a delay (often about a day)
         // and needs the Reports.Read.All application permission.
         var stream = await _graphClient.Reports
-            .GetMailboxUsageDetailWithPeriod("D7")
+            .GetMailboxUsageDetailWithPeriod(period)
             .GetAsync();
 
         if (stream == null)
@@ -195,33 +219,56 @@ public class Microsoft365IntegrationService : IMicrosoft365IntegrationService
         var quotaIndex = header.IndexOf("Prohibit Send/Receive Quota (Byte)");
         var deletedIndex = header.IndexOf("Is Deleted");
 
+        _logger.LogInformation(
+            "Mailbox report header parsed. Columns={ColumnCount}, UPNIndex={UpnIndex}, UsedIndex={UsedIndex}, QuotaIndex={QuotaIndex}, DeletedIndex={DeletedIndex}.",
+            header.Count, upnIndex, usedIndex, quotaIndex, deletedIndex);
+
         if (upnIndex < 0 || usedIndex < 0 || quotaIndex < 0)
             throw new InvalidOperationException(
                 "Mailbox usage report columns were not found as expected.");
 
         string? line;
+        var rowCount = 0;
+        var skippedShortRows = 0;
+        var skippedDeletedRows = 0;
+        var matchedRows = 0;
+        var normalizedTarget = userIdentifier.Trim().Trim('"');
         while ((line = await reader.ReadLineAsync()) != null)
         {
             if (line.Length == 0)
                 continue;
 
+            rowCount++;
+
             var columns = ParseCsvLine(line);
 
             if (columns.Count <= Math.Max(upnIndex, Math.Max(usedIndex, quotaIndex)))
+            {
+                skippedShortRows++;
                 continue;
+            }
 
             // Deleted mailboxes can keep a row with the same UPN; skip them.
             if (deletedIndex >= 0 && columns.Count > deletedIndex &&
                 string.Equals(columns[deletedIndex].Trim(), "True",
                     StringComparison.OrdinalIgnoreCase))
+            {
+                skippedDeletedRows++;
                 continue;
+            }
 
-            if (!string.Equals(columns[upnIndex], userIdentifier,
+            if (!string.Equals(columns[upnIndex].Trim().Trim('"'), normalizedTarget,
                     StringComparison.OrdinalIgnoreCase))
                 continue;
 
+            matchedRows++;
+
             long.TryParse(columns[usedIndex], out var usedBytes);
             long.TryParse(columns[quotaIndex], out var quotaBytes);
+
+            _logger.LogInformation(
+                "Mailbox report row matched for {UserIdentifier}. Rows={Rows}, MatchedRows={MatchedRows}, UsedBytes={UsedBytes}, QuotaBytes={QuotaBytes}.",
+                userIdentifier, rowCount, matchedRows, usedBytes, quotaBytes);
 
             return new MailboxUsageDto
             {
@@ -232,6 +279,10 @@ public class Microsoft365IntegrationService : IMicrosoft365IntegrationService
                 IsMock = false
             };
         }
+
+        _logger.LogWarning(
+            "No mailbox report row matched {UserIdentifier} for period {Period}. Rows={Rows}, ShortRows={ShortRows}, DeletedRows={DeletedRows}.",
+            userIdentifier, period, rowCount, skippedShortRows, skippedDeletedRows);
 
         return new MailboxUsageDto
         {

@@ -10,6 +10,10 @@
    AZURE_CLIENT_ID=your_value_here
    AZURE_CLIENT_SECRET=your_value_here
    POWERSHELL_PATH=C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+   EXCHANGE_APP_ID=your_exchange_app_id
+   EXCHANGE_ORGANIZATION=yourtenant.onmicrosoft.com
+   EXCHANGE_CERTIFICATE_THUMBPRINT=your_certificate_thumbprint
+   ALERT_SENDER_USER=alerts@yourtenant.onmicrosoft.com
    ```
 
 3. **Get values from Azure Portal:**
@@ -27,4 +31,9 @@
 
 - If "Azure credentials not configured" error: check .env path
 - If "authentication failed" error: verify secret in Azure Portal is active
+- If Exchange returns HTTP 502: configure all three `EXCHANGE_*` values,
+  install the ExchangeOnlineManagement PowerShell module, and confirm the
+  certificate thumbprint exists in the local certificate store.
+- For real UC-08 email alerts, configure `ALERT_SENDER_USER` and grant the
+  application Microsoft Graph `Mail.Send` permission with admin consent.
 - Restart API after changing .env file

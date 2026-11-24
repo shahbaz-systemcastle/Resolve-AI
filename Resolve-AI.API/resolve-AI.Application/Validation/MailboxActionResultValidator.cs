@@ -15,6 +15,7 @@ public static class MailboxActionResultValidator
     {
         Phase7Status.NotApproved,
         Phase7Status.MailboxActionLoggedOnly,
+        "PENDING_USER_ACTION",
         "EXECUTED",
         Phase7Status.MailboxActionFailed
     };

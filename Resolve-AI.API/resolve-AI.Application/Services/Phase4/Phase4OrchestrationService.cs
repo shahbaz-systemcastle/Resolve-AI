@@ -36,12 +36,19 @@ public class Phase4OrchestrationService : IPhase4OrchestrationService
     {
         var orchestrationResult = new OrchestrationResult
         {
-            RequestId = request.Id,
+            RequestId = request?.Id ?? string.Empty,
             Status = "Processing"
         };
 
         try
         {
+            if (request == null)
+            {
+                orchestrationResult.Status = "ValidationFailed";
+                orchestrationResult.FinalError = "Request cannot be null";
+                return orchestrationResult;
+            }
+
             // 4.02: Validate request
             if (!ValidateRequest(request))
             {
@@ -57,12 +64,35 @@ public class Phase4OrchestrationService : IPhase4OrchestrationService
             var executionResults = await ExecutePhasesAsync(request, route, cancellationToken);
             orchestrationResult.PhaseResults = executionResults;
 
+
             // 4.07-4.10: Aggregate results
             var aggregatedResult = _resultCollector.AggregateResults();
 
             // Determine final status
-            var hasErrors = executionResults.Any(r => r.Status == "Failed");
-            orchestrationResult.Status = hasErrors ? "CompletedWithErrors" : "Success";
+            var hasFailures = executionResults.Any(r =>
+                r.Status is "Failed" or "Unknown");
+            var hasRejected = executionResults.Any(r =>
+                r.Status is "Rejected" or "NotImplemented");
+            var hasPartial = executionResults.Any(r =>
+                r.Status == "PartiallySucceeded");
+
+            orchestrationResult.Status = hasFailures
+                ? "Failed"
+                : hasRejected || hasPartial
+                    ? "CompletedWithErrors"
+                    : "Success";
+
+            if (orchestrationResult.Status != "Success")
+            {
+                orchestrationResult.FinalError = string.Join(
+                    "; ",
+                    executionResults
+                        .Where(r => r.Status != "SucceededVerified")
+                        .Select(r => $"Phase {r.PhaseNumber}: {r.Status}"
+                            + (string.IsNullOrWhiteSpace(r.Error)
+                                ? string.Empty
+                                : $" ({r.Error})")));
+            }
 
             return orchestrationResult;
         }
@@ -71,7 +101,7 @@ public class Phase4OrchestrationService : IPhase4OrchestrationService
             // 4.11: Error handling
             var context = new OrchestrationContext
             {
-                RequestId = request.Id,
+                RequestId = request?.Id ?? string.Empty,
                 CurrentPhase = 4
             };
 

@@ -12,6 +12,22 @@ public class FakeM365 : IMicrosoft365IntegrationService
     public Task<Microsoft365LicenseStatusDto> GetLicenseStatusAsync(string u, string t) => Task.FromResult(new Microsoft365LicenseStatusDto { UserIdentifier = u, IsMock = true });
     public Task<Microsoft365LicenseAssignmentResultDto> AssignLicenseAsync(string u, string t, bool a) => throw new InvalidOperationException("not used");
     public Task<MailboxUsageDto> GetMailboxUsageAsync(string u, string t) => Task.FromResult(new MailboxUsageDto { UserIdentifier = u, Found = true, UsedBytes = Used, QuotaBytes = Quota, IsMock = true });
+    public Task<LicenseSnapshotDto> GetLicenseSubscriptionSnapshotAsync(string t) => Task.FromResult(new LicenseSnapshotDto { TotalSeats = 100, ConsumedSeats = 50, AvailableSeats = 50, SnapshotAtUtc = DateTime.UtcNow, IsMock = true });
+}
+
+public class FakeHandoff : IPhase7HandoffService
+{
+    public Task<Phase7WorkflowResultDto> PrepareHandoffAsync(Phase7WorkflowResultDto result) => Task.FromResult(result);
+}
+
+public class FakeStorage : IPhase8StorageService
+{
+    public Task<int> SaveRequestAsync(string requestId, string userIdentifier, int useCase, string tenantIdentifier, bool isApproved) => Task.FromResult(1);
+    public Task SaveResultAsync(int requestDbId, string phase7RequestId, string status, string message, bool isMock, string additionalData = null) => Task.CompletedTask;
+    public Task LogActionAsync(int requestDbId, string phase7RequestId, string action, string actionStatus, string details, string errorMessage = null) => Task.CompletedTask;
+    public Task<resolve_AI.Domain.Entities.Phase8Request> GetRequestAsync(string phase7RequestId) => Task.FromResult<resolve_AI.Domain.Entities.Phase8Request>(null);
+    public Task<resolve_AI.Domain.Entities.Phase8Result> GetResultAsync(string phase7RequestId) => Task.FromResult<resolve_AI.Domain.Entities.Phase8Result>(null);
+    public Task<List<resolve_AI.Domain.Entities.Phase8AuditLog>> GetAuditLogsAsync(string phase7RequestId) => Task.FromResult(new List<resolve_AI.Domain.Entities.Phase8AuditLog>());
 }
 
 public class RecordingNotifier : IMailboxAlertNotifier
@@ -41,7 +57,12 @@ public static class Harness
     {
         var notifier = new RecordingNotifier();
         var executor = new FakeExecutor { Produce = produce };
-        var svc = new Phase7WorkflowService(new FakeM365 { Used = used, Quota = quota }, notifier, executor);
+        var svc = new Phase7WorkflowService(
+            new FakeM365 { Used = used, Quota = quota },
+            notifier,
+            executor,
+            new FakeHandoff(),
+            new FakeStorage());
         var r = await svc.ProcessAsync(new Phase7WorkflowRequestDto { RequestId = "H-" + name, UseCase = UseCaseType.MailboxCapacityThresholdAlert, UserIdentifier = "user@x.com", IsApproved = approved });
         Console.WriteLine($"[{name}] workflow={r.Status} success={r.Success}");
         Console.WriteLine($"   7.13  decision   = {r.QuotaEvaluation?.Decision} ({r.QuotaEvaluation?.CapacityState})");

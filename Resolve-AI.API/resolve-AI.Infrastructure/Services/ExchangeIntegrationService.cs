@@ -1,15 +1,25 @@
 ﻿using System.Diagnostics;
 using System.Text;
+using Microsoft.Extensions.Logging;
 using resolve_AI.Application.Interfaces;
 
 namespace resolve_AI.Infrastructure.Services;
 
 public class ExchangeIntegrationService : IExchangeIntegrationService
 {
+    private readonly ILogger<ExchangeIntegrationService> _logger;
+
+    public ExchangeIntegrationService(ILogger<ExchangeIntegrationService> logger)
+    {
+        _logger = logger;
+    }
+
     public async Task<bool> CheckAvailabilityAsync(
         CancellationToken cancellationToken = default)
     {
         var powershellPath = Required("POWERSHELL_PATH");
+
+        _logger.LogInformation("Exchange availability check started using configured PowerShell path.");
 
         if (!File.Exists(powershellPath))
             throw new InvalidOperationException(
@@ -98,13 +108,19 @@ public class ExchangeIntegrationService : IExchangeIntegrationService
         var error = await errorTask;
 
         if (process.ExitCode != 0)
+        {
+            _logger.LogError("Exchange PowerShell exited with code {ExitCode}. Error={Error}", process.ExitCode, error.Trim());
             throw new InvalidOperationException(
                 $"Exchange connection failed: {error.Trim()}");
+        }
 
         if (!output.Split('\n').Any(
                 line => line.Trim() == "RESOLVE_AI_EXCHANGE_OK"))
+        {
+            _logger.LogError("Exchange PowerShell completed without success marker. Output={Output}", output.Trim());
             throw new InvalidOperationException(
                 "Exchange connection confirmation was not received.");
+        }
 
         return true;
     }
