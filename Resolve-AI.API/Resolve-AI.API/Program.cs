@@ -7,9 +7,16 @@ using resolve_AI.Infrastructure.Services;
 using resolve_AI.Infrastructure.Services.Phase4;
 using DotNetEnv;
 
-// Load .env file for Azure credentials
-var envPath = Path.Combine(Directory.GetCurrentDirectory(), "..", ".env");
-DotNetEnv.Env.Load(envPath);
+// Load .env file for Azure credentials. Support both the repository root
+// and the project directory so local runs work from either folder.
+var envPaths = new[]
+{
+    Path.Combine(Directory.GetCurrentDirectory(), ".env"),
+    Path.Combine(Directory.GetCurrentDirectory(), "..", ".env")
+};
+
+foreach (var envPath in envPaths.Where(File.Exists))
+    DotNetEnv.Env.Load(envPath);
 
 var builder = WebApplication.CreateBuilder(args);
 
