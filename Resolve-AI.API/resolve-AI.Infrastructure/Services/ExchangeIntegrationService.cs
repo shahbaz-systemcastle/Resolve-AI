@@ -62,6 +62,22 @@ public class ExchangeIntegrationService : IExchangeIntegrationService
             CreateNoWindow = true
         };
 
+        // Do not load the interactive PowerShell profile. Profiles can import
+        // incompatible PackageManagement modules and break app-only Exchange
+        // checks before the Exchange script starts.
+        startInfo.ArgumentList.Add("-NoProfile");
+        startInfo.Environment["PSModulePath"] = string.Join(
+            Path.PathSeparator,
+            new[]
+            {
+                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)
+                    + @"\Documents\WindowsPowerShell\Modules",
+                Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles)
+                    + @"\WindowsPowerShell\Modules",
+                Environment.GetFolderPath(Environment.SpecialFolder.System)
+                    + @"\WindowsPowerShell\v1.0\Modules"
+            });
+
         startInfo.Environment["EXCHANGE_APP_ID"] =
             Required("EXCHANGE_APP_ID");
         startInfo.Environment["EXCHANGE_ORGANIZATION"] =
